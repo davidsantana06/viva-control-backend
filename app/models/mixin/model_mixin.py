@@ -4,10 +4,9 @@ from sqlalchemy.orm import Mapped
 
 from app.extensions import db
 from app.utils.model_mappers import set_primary_key_column
-from .timestamp_mixin import TimestampMixin
 
 
-class ModelMixin(TimestampMixin):
+class ModelMixin:
     @declared_attr
     def id(cls) -> Mapped[int]:
         return set_primary_key_column()
