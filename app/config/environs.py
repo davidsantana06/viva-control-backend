@@ -1,6 +1,7 @@
 from os import environ
 from . import paths
 
+
 SQLALCHEMY_DATABASE_URI = environ.get(
     "DATABASE_URI",
     f"sqlite:///{paths.SQLITE_FILE}",
