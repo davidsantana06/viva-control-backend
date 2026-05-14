@@ -32,7 +32,7 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         return cls.query.filter(cls.id == id).first()
 
     @classmethod
-    def find_first_by_email(cls, email: str):
+    def find_first_by_email(cls, email: str) -> Self | None:
         return cls.query.filter(cls.email == email).first()
 
     @classmethod

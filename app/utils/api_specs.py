@@ -1,5 +1,6 @@
 from flask_restx import Namespace
 from flask_restx.reqparse import RequestParser
+from typing import get_args
 
 from app.types import FindAllParams, SortOrder
 
@@ -12,14 +13,22 @@ def set_find_all_parser(ns: Namespace) -> RequestParser:
         "order",
         location="args",
         default="ASC",
-        choices=list(SortOrder),
+        choices=get_args(SortOrder),
         help="Sort order",
     )
     parser.add_argument(
-        "page", location="args", type=int, default=1, help="Page number"
+        "page",
+        location="args",
+        type=int,
+        default=1,
+        help="Page number",
     )
     parser.add_argument(
-        "per_page", location="args", type=int, default=10, help="Items per page"
+        "per_page",
+        location="args",
+        type=int,
+        default=10,
+        help="Items per page",
     )
     return parser
 
