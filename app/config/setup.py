@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 from flask import Flask
 
 from app.apis import user_ns
-from app.container import Container
 from app.extensions import api, cors, db, migrate
 from . import environs, paths
 
@@ -39,5 +38,3 @@ def init_extensions(app: Flask) -> None:
     _init_cors(app)
 
 
-def init_container(app: Flask) -> None:
-    app.container = Container()
