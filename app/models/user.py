@@ -10,7 +10,7 @@ from app.extensions import db
 from app.models.contract.user_repository import UserRepository
 from app.models.mixin.lifecycle_mixin import LifecycleMixin
 from app.models.mixin.model_mixin import ModelMixin
-from app.types import SortOrder
+from app.types import FindAllParams
 from app.utils.model_mappers import set_foreign_key_column
 
 
@@ -29,26 +29,24 @@ class User(db.Model, ModelMixin, LifecycleMixin, UserRepository):
     )
 
     @classmethod
-    def find_first(cls, id: int) -> Self | None:
+    def find_first_by_id(cls, id: int) -> Self | None:
         return cls.query.filter(cls.id == id).first()
 
     @classmethod
-    def find_all(
-        cls,
-        q: str | None = None,
-        order: SortOrder = "ASC",
-        sort: str = "id",
-        page: int = 1,
-        per_page: int = 10,
-    ) -> list[Self]:
-        ordering = cls._mount_ordering(sort, order)
-        q_filter = cls._mount_q_filter(q, cls.name, cls.email)
+    def find_first_by_email(cls, email: str):
+        return cls.query.filter(cls.email == email).first()
+
+    @classmethod
+    def find_all(cls, params: FindAllParams) -> list[Self]:
+        q_filter = cls._mount_q_filter(params.q, cls.name, cls.email)
+        ordering = cls._mount_ordering(params.sort, params.order)
+        offset = cls._calculate_offset(params.page, params.per_page)
 
         return (
             cls.query
             .filter(q_filter, cls.is_active.is_(True))
             .order_by(ordering)
-            .offset(cls._calculate_offset(page, per_page))
-            .limit(per_page)
+            .offset(offset)
+            .limit(params.per_page)
             .all()
         )

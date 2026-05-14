@@ -1,28 +1,25 @@
 from abc import ABC, abstractmethod
 from typing import Self
 
-from app.types import SortOrder
+from app.types import FindAllParams
 
 
 class UserRepository(ABC):
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def create(cls, user: Self) -> None: ...
+    def save(user: Self) -> None: ...
 
     @classmethod
     @abstractmethod
-    def find_first(cls, id: int) -> Self | None: ...
+    def find_all(cls, params: FindAllParams) -> list[Self]: ...
 
     @classmethod
     @abstractmethod
-    def find_all(
-        cls,
-        q: str | None = None,
-        order: SortOrder = "ASC",
-        sort: str = "id",
-        page: int = 1,
-        per_page: int = 10,
-    ) -> list[Self]: ...
+    def find_first_by_id(cls, id: int) -> Self | None: ...
+
+    @classmethod
+    @abstractmethod
+    def find_first_by_email(cls, email: str) -> Self | None: ...
 
     @classmethod
     @abstractmethod

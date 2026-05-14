@@ -19,7 +19,8 @@ class CreateUserDto(TypedDict):
     parent_id: NotRequired[int]
     name: str
     email: str
-    password: str
+    password: NotRequired[str]
+    password_hash: NotRequired[str]
     role: UserRole
 
 
@@ -27,6 +28,7 @@ class UpdateUserDto(TypedDict):
     name: str
     email: str
     password: NotRequired[str]
+    password_hash: NotRequired[str]
 
 
 user = api.model(

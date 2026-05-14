@@ -14,5 +14,3 @@ class LifecycleMixin(TimestampMixin):
     @classmethod
     def deactivate(cls, model: Self) -> None:
         model.is_active = False
-        db.session.add(model)
-        db.session.commit()

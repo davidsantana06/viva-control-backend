@@ -14,6 +14,9 @@ class ModelMixin(Model):
     def id(cls) -> Mapped[int]:
         return set_primary_key_column()
 
+    def update(self, **kwargs) -> None:
+        self.__dict__.update(kwargs)
+
     @staticmethod
     def save(model: Self) -> None:
         db.session.add(model)
