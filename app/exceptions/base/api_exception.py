@@ -6,5 +6,5 @@ class ApiException(HTTPException):
     description: str
 
     @classmethod
-    def get_response(cls) -> tuple[int, str]:
+    def get_specs(cls) -> tuple[int, str]:
         return (cls.code, cls.description)

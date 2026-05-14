@@ -31,7 +31,7 @@ class UpdateUserDto(TypedDict):
     password_hash: NotRequired[str]
 
 
-user = api.model(
+user_dto = api.model(
     "User",
     UserDto(
         id=Integer(readonly=True),
@@ -43,7 +43,7 @@ user = api.model(
     ),
 )
 
-create_user = api.model(
+create_user_dto = api.model(
     "CreateUser",
     CreateUserDto(
         parent_id=Integer(),
@@ -54,7 +54,7 @@ create_user = api.model(
     ),
 )
 
-update_user = api.model(
+update_user_dto = api.model(
     "UpdateUser",
     UpdateUserDto(
         name=String(min_length=2, max_length=50),

@@ -36,5 +36,3 @@ def init_extensions(app: Flask) -> None:
     _init_migrate(app)
     _init_api(app)
     _init_cors(app)
-
-

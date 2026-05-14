@@ -1,1 +1,1 @@
-from .user_api import users_api as user_ns
+from .user_api import user_ns
