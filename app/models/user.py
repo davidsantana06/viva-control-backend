@@ -7,14 +7,13 @@ from sqlalchemy.orm import (
 from typing import Self
 
 from app.extensions import db
-from app.models.contract.user_repository import UserRepository
 from app.models.mixin.lifecycle_mixin import LifecycleMixin
 from app.models.mixin.model_mixin import ModelMixin
 from app.types import FindAllParams
 from app.utils.model_mappers import set_foreign_key_column
 
 
-class User(db.Model, ModelMixin, LifecycleMixin, UserRepository):
+class User(db.Model, ModelMixin, LifecycleMixin):
     __tablename__ = "users"
 
     parent_id: Mapped[int | None] = set_foreign_key_column("users", nullable=True)
