@@ -15,7 +15,7 @@ class ModelMixin(Model):
         return set_primary_key_column()
 
     @staticmethod
-    def save(model: Model) -> None:
+    def save(model: Self) -> None:
         db.session.add(model)
         db.session.commit()
 
