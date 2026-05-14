@@ -6,9 +6,12 @@ def set_primary_key_column() -> MappedColumn[int]:
     return mapped_column(primary_key=True, autoincrement=True)
 
 
-def set_foreign_key_column(table_name: str) -> MappedColumn[int]:
+def set_foreign_key_column(
+    table_name: str,
+    nullable: bool = False,
+) -> MappedColumn[int]:
     related_id = ForeignKey(f"{table_name}.id")
-    return mapped_column(related_id, nullable=False)
+    return mapped_column(related_id, nullable=nullable)
 
 
 def set_child_relationship(back_populates: str) -> Relationship[list]:
