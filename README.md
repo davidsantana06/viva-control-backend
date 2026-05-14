@@ -1,4 +1,4 @@
-**viva-control-backend** é o servidor backend do Viva Control — sistema de gestão web para distribuidores e vendedores parceiros da Viva Professional.
+**viva-control-backend** é o servidor backend do Viva Control — sistema de gestão web para distribuidores parceiros da Viva Professional.
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
@@ -11,17 +11,18 @@
 
 ### 📖 Glossário de Tecnologias
 
-| Tecnologia       | Descrição                                                                                                                                                             |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Flask            | Microframework web em Python. Provê o servidor HTTP, roteamento e o ciclo de vida da aplicação.                                                                       |
-| Flask-RESTX      | Extensão do Flask para construção de APIs REST. Adiciona organização por Namespaces, validação de payload e geração automática de documentação via Swagger UI em `/`. |
-| Swagger UI       | Interface gráfica para documentação interativa e teste da API REST. Gerada automaticamente pelo Flask-RESTX a partir dos Namespaces e Resources, disponível em `/`.   |
-| Flask-SQLAlchemy | Integração entre Flask e SQLAlchemy. Gerencia a sessão do banco de dados e o ciclo de vida da conexão dentro do contexto da aplicação.                                |
-| SQLAlchemy       | ORM e toolkit SQL em Python. Mapeia classes Python a tabelas relacionais e gerencia transações.                                                                       |
-| Flask-Migrate    | Controle de versão do esquema do banco de dados via Alembic. Gera e aplica scripts de migração a partir das alterações nos modelos.                                   |
-| Flask-CORS       | Gerenciamento de Cross-Origin Resource Sharing. Controla quais origens têm permissão para consumir a API.                                                             |
-| SQLite           | Banco de dados relacional embutido, sem necessidade de servidor. Utilizado no ambiente de desenvolvimento pelo custo zero de infraestrutura.                          |
-| PostgreSQL       | Banco de dados relacional com suporte completo a transações ACID e controle de concorrência por linha. Escolha para o ambiente de produção.                           |
+| Tecnologia         | Descrição                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Flask              | Microframework web em Python. Provê o servidor HTTP, roteamento e o ciclo de vida da aplicação.                                                                     |
+| Flask-RESTX        | Extensão do Flask para construção de APIs REST. Adiciona organização por Namespaces, validação de payload e geração automática de documentação via Swagger UI.      |
+| Swagger UI         | Interface gráfica para documentação interativa e teste da API REST. Gerada automaticamente pelo Flask-RESTX a partir dos Namespaces e Resources, disponível em `/`. |
+| Flask-SQLAlchemy   | Integração entre Flask e SQLAlchemy. Gerencia a sessão do banco de dados e o ciclo de vida da conexão dentro do contexto da aplicação.                              |
+| SQLAlchemy         | ORM e toolkit SQL em Python. Mapeia classes Python a tabelas relacionais e gerencia transações.                                                                     |
+| Flask-Migrate      | Controle de versão do esquema do banco de dados via Alembic. Gera e aplica scripts de migração a partir das alterações nos modelos.                                 |
+| Flask-JWT-Extended | Autenticação stateless via JSON Web Token. Gerencia emissão, validação e proteção de rotas com `@jwt_required()`, além de claims adicionais no payload do token.    |
+| Flask-CORS         | Gerenciamento de Cross-Origin Resource Sharing. Controla quais origens têm permissão para consumir a API.                                                           |
+| SQLite             | Banco de dados relacional embutido, sem necessidade de servidor. Utilizado no ambiente de desenvolvimento pelo custo zero de infraestrutura.                        |
+| PostgreSQL         | Banco de dados relacional com suporte completo a transações ACID e controle de concorrência por linha. Escolha para o ambiente de produção.                         |
 
 ## 🛠️ Instalação e Execução
 
@@ -30,7 +31,10 @@ Desenvolvido em **Python 3.12**, recomenda-se o uso dessa versão para garantir 
 ### 1️⃣ Criar e Ativar o Ambiente Virtual
 
 ```bash
-python -m venv .venv
+# Windows
+
+# Linux / macOS
+python3 -m venv .venv
 ```
 
 ```bash
@@ -52,6 +56,7 @@ pip install -r requirements.txt
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 - `DATABASE_URI` — URI de conexão com o banco de dados (ex.: `sqlite:///database.sqlite3` ou `postgresql://user:password@host/db`).
+- `JWT_SECRET_KEY` — Chave secreta usada para assinar os tokens JWT. Deve ser uma string longa e aleatória em produção.
 - `ALLOWED_HOSTS` — Origens permitidas pelo CORS, separadas por espaço (ex.: `http://localhost:5173`).
 
 ### 4️⃣ Aplicar Migrações
@@ -93,58 +98,65 @@ O controle de acesso (RBAC) com três perfis — `ADMIN`, `DISTRIBUTOR` e `SELLE
 ```
 viva-control-backend/
 ├── app/
-│   ├── models/
-│   │   ├── contract/
-│   │   └── mixin/
-│   ├── services/
-│   │   └── contract/
-│   ├── schemas/
-│   │   ├── contract/
-│   │   └── mixin/
 │   ├── apis/
+│   ├── config/
+│   ├── dto/
+│   │   └── mixin/
 │   ├── exceptions/
 │   │   └── base/
-│   ├── utils/
-│   └── config/
-└── migrations/
-    └── versions/
+│   ├── models/
+│   │   └── mixin/
+│   ├── services/
+│   ├── types/
+│   └── utils/
+├── migrations/
+│   └── versions/
+└── static/
 ```
 
 ### 📁 `app/`
 
 Código-fonte principal.
 
-#### 📁 `models/`
-
-Camada de **persistência** — modelos SQLAlchemy. O subdiretório `contract/` define classes abstratas e Protocols que estabelecem contratos de comportamento obrigatórios. O subdiretório `mixin/` expõe mixins reutilizáveis: chave primária autoincrementada, métodos `save` e `delete`, e colunas de auditoria `created_at` e `updated_at`.
-
-#### 📁 `services/`
-
-Camada de **lógica de negócio** — funções procedurais que operam sobre os modelos e orquestram as regras de cada domínio. O subdiretório `contract/` contém contratos abstratos para serviços.
-
-#### 📁 `schemas/`
-
-Contratos de serialização e validação da API — modelos Flask-RESTX (`api.model()`). O subdiretório `contract/` define contratos abstratos; o subdiretório `mixin/` expõe campos reutilizáveis, como `timestamp_fields`, para serem espalhados em qualquer schema.
-
 #### 📁 `apis/`
 
-Camada de **apresentação** — Namespaces e Resources do Flask-RESTX. Cada arquivo define um Namespace com as rotas e os decorators de validação, documentação e resposta. Não contém lógica de negócio: delega toda operação ao serviço correspondente.
-
-#### 📁 `exceptions/`
-
-Hierarquia de exceções HTTP da aplicação. A classe raiz `ApiException`, no subdiretório `base/`, herda de `HTTPException` e expõe o classmethod `get_response()` para compor tuplas de resposta nos decorators `@ns.response`. As exceções concretas combinam `ApiException` com as exceções HTTP do Werkzeug via herança múltipla.
-
-#### 📁 `utils/`
-
-Utilitários transversais sem vínculo com um domínio específico. Concentra funções auxiliares para declaração de colunas e relacionamentos SQLAlchemy, além de constantes de padrões de validação reutilizáveis nas schemas.
+Camada de **apresentação** — Namespaces e Resources do Flask-RESTX. Cada arquivo define um Namespace com as rotas e os decorators de validação, documentação, proteção JWT e resposta. Não contém lógica de negócio: delega toda operação ao serviço correspondente.
 
 #### 📁 `config/`
 
 Configuração e inicialização da aplicação:
 
-- 📄 `paths.py` — Constantes de caminhos do sistema de arquivos (`ROOT_DIR`, `ENV_FILE`, `DATABASE_FILE`).
+- 📄 `paths.py` — Constantes de caminhos do sistema de arquivos.
 - 📄 `environs.py` — Variáveis de ambiente lidas via `os.environ`, com valores padrão para desenvolvimento.
-- 📄 `setup.py` — Funções procedurais `setup_environs` e `setup_extensions`, responsáveis por aplicar parâmetros ao `app` e inicializar as extensões Flask.
+- 📄 `setup.py` — Funções de inicialização das extensões Flask: banco de dados, migrações, JWT, API e CORS.
+
+#### 📁 `dto/`
+
+Data Transfer Objects — `TypedDict`s que tipam os payloads de entrada e saída, e modelos Flask-RESTX (`api.model()`) que os expõem ao Swagger e à camada de validação. O subdiretório `mixin/` expõe campos reutilizáveis entre DTOs.
+
+#### 📁 `exceptions/`
+
+Hierarquia de exceções HTTP da aplicação. A classe raiz `ApiException`, no subdiretório `base/`, herda de `HTTPException` e expõe o classmethod `get_specs()` para compor tuplas `(code, description)` nos decorators `@ns.response`. As exceções concretas combinam `ApiException` com as exceções HTTP do Werkzeug via herança múltipla.
+
+#### 📁 `models/`
+
+Camada de **persistência** — modelos SQLAlchemy. O subdiretório `mixin/` expõe mixins reutilizáveis: chave primária autoincrementada, métodos `save` e `update`, inativação lógica e colunas de auditoria `created_at` e `updated_at`.
+
+#### 📁 `services/`
+
+Camada de **lógica de negócio** — módulos de funções procedurais que operam sobre os modelos e orquestram as regras de cada domínio.
+
+#### 📁 `types/`
+
+Tipos compartilhados entre camadas: `Literal`, `StrEnum`, dataclasses frozen e aliases do SQLAlchemy.
+
+#### 📁 `utils/`
+
+Utilitários transversais sem vínculo com um domínio específico:
+
+- 📄 `model_mappers.py` — Funções auxiliares para declaração de colunas e relacionamentos SQLAlchemy.
+- 📄 `api_specs.py` — Helpers de Flask-RESTX: parser de parâmetros de listagem e conversão para `FindAllParams`.
+- 📄 `regexes.py` — Constantes de padrões de validação reutilizáveis.
 
 ### 📁 `migrations/`
 
