@@ -1,4 +1,5 @@
 from werkzeug.exceptions import HTTPException
+from app.types import ExceptionSpecs
 
 
 class ApiException(HTTPException):
@@ -6,5 +7,5 @@ class ApiException(HTTPException):
     description: str
 
     @classmethod
-    def get_specs(cls) -> tuple[int, str]:
+    def get_specs(cls) -> ExceptionSpecs:
         return (cls.code, cls.description)

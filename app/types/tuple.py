@@ -1,0 +1,1 @@
+ExceptionSpecs = tuple[str, int]
