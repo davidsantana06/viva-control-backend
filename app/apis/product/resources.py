@@ -1,8 +1,15 @@
 from flask_restx import Resource
 from http import HTTPStatus
 
-from app.decorators import role_required
-from app.exceptions import InvalidPayload, ProductNotFound
+from app.decorators import (
+    create_resource,
+    deactivate_resource,
+    get_resource,
+    list_resource,
+    role_required,
+    update_resource,
+)
+from app.exceptions import ProductNotFound, ProductSkuAlreadyInUse
 from app.services import ProductService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -15,18 +22,18 @@ from .models import create_product_model, product_model, update_product_model
 class ProductList(Resource):
     __find_all_parser = ApiUtils.build_find_all_parser(product_ns)
 
-    @product_ns.doc("create_product")
-    @product_ns.expect(create_product_model)
-    @product_ns.marshal_with(product_model, code=HTTPStatus.CREATED)
-    @product_ns.response(*InvalidPayload.get_specs())
+    @create_resource(
+        product_ns,
+        create_product_model,
+        product_model,
+        ProductSkuAlreadyInUse,
+    )
     @role_required(UserRole.ADMIN)
     def post(self):
         """Create a new product"""
         return ProductService.create(product_ns.payload), HTTPStatus.CREATED
 
-    @product_ns.doc("list_products")
-    @product_ns.expect(__find_all_parser)
-    @product_ns.marshal_list_with(product_model)
+    @list_resource(product_ns, __find_all_parser, product_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self):
         """Get all products"""
@@ -36,26 +43,26 @@ class ProductList(Resource):
 
 @product_ns.route("/<int:id>")
 @product_ns.param("id", "The product identifier")
-@product_ns.response(*ProductNotFound.get_specs())
 class Product(Resource):
-    @product_ns.doc("get_product")
-    @product_ns.marshal_with(product_model)
+    @get_resource(product_ns, product_model, ProductNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int):
         """Get a product by ID"""
         return ProductService.find_first(id)
 
-    @product_ns.doc("update_product")
-    @product_ns.expect(update_product_model)
-    @product_ns.marshal_with(product_model)
-    @product_ns.response(*InvalidPayload.get_specs())
+    @update_resource(
+        product_ns,
+        update_product_model,
+        product_model,
+        ProductNotFound,
+        ProductSkuAlreadyInUse,
+    )
     @role_required(UserRole.ADMIN)
     def patch(self, id: int):
         """Update a product by ID"""
         return ProductService.update(id, product_ns.payload)
 
-    @product_ns.doc("deactivate_product")
-    @product_ns.response(HTTPStatus.NO_CONTENT, "Success")
+    @deactivate_resource(product_ns, ProductNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a product by ID"""

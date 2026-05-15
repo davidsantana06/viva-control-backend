@@ -1,8 +1,15 @@
 from flask_restx import Resource
 from http import HTTPStatus
 
-from app.decorators import role_required
-from app.exceptions import InvalidPayload, UserNotFound
+from app.decorators import (
+    create_resource,
+    deactivate_resource,
+    get_resource,
+    list_resource,
+    role_required,
+    update_resource,
+)
+from app.exceptions import UserEmailAlreadyInUse, UserNotFound
 from app.services import UserService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -15,18 +22,18 @@ from .models import create_user_model, update_user_model, user_model
 class UserList(Resource):
     __find_all_parser = ApiUtils.build_find_all_parser(user_ns)
 
-    @user_ns.doc("create_user")
-    @user_ns.expect(create_user_model)
-    @user_ns.marshal_with(user_model, code=HTTPStatus.CREATED)
-    @user_ns.response(*InvalidPayload.get_specs())
+    @create_resource(
+        user_ns,
+        create_user_model,
+        user_model,
+        UserEmailAlreadyInUse,
+    )
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def post(self):
         """Create a new user"""
         return UserService.create(user_ns.payload), HTTPStatus.CREATED
 
-    @user_ns.doc("list_users")
-    @user_ns.expect(__find_all_parser)
-    @user_ns.marshal_list_with(user_model)
+    @list_resource(user_ns, __find_all_parser, user_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self):
         """Get all users"""
@@ -36,26 +43,26 @@ class UserList(Resource):
 
 @user_ns.route("/<int:id>")
 @user_ns.param("id", "The user identifier")
-@user_ns.response(*UserNotFound.get_specs())
 class User(Resource):
-    @user_ns.doc("get_user")
-    @user_ns.marshal_with(user_model)
+    @get_resource(user_ns, user_model, UserNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self, id: int):
         """Get a user by ID"""
         return UserService.find_first(id)
 
-    @user_ns.doc("update_user")
-    @user_ns.expect(update_user_model)
-    @user_ns.marshal_with(user_model)
-    @user_ns.response(*InvalidPayload.get_specs())
+    @update_resource(
+        user_ns,
+        update_user_model,
+        user_model,
+        UserNotFound,
+        UserEmailAlreadyInUse,
+    )
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def patch(self, id: int):
         """Update a user by ID"""
         return UserService.update(id, user_ns.payload)
 
-    @user_ns.doc("deactivate_user")
-    @user_ns.response(HTTPStatus.NO_CONTENT, "Success")
+    @deactivate_resource(user_ns, UserNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def delete(self, id: int):
         """Deactivate a user by ID"""

@@ -30,9 +30,8 @@ class ProductService:
     @classmethod
     def update(cls, id: int, dto: UpdateProductDto) -> Product:
         product = cls.find_first(id)
-        new_sku = dto.get("sku")
 
-        sku_already_in_use = new_sku != product.sku and Product.find_first_by_sku(new_sku)
+        sku_already_in_use = dto["sku"] != product.sku and Product.find_first_by_sku(dto["sku"])
         if sku_already_in_use:
             raise ProductSkuAlreadyInUse()
 

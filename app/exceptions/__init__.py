@@ -1,3 +1,4 @@
+from .base.api_exception import ApiException
 from .conflict import *
 from .forbidden import *
 from .not_found import *
