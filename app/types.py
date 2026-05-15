@@ -35,6 +35,7 @@ ExceptionSpecs = tuple[str, int]
 # enum_
 
 class UserRole(StrEnum):
+    ADMIN = "ADMIN"
     DISTRIBUTOR = "DISTRIBUTOR"
     SELLER = "SELLER"
 
