@@ -54,26 +54,23 @@ class Setup:
 
         api.authorizations = cls.__API_AUTHORIZATIONS
 
-        api.errorhandler(
-            InvalidHeaderError,
+        api.errorhandler(InvalidHeaderError)(
             lambda _: (
                 {"message": "Invalid authorization header"},
                 HTTPStatus.UNPROCESSABLE_CONTENT,
             ),
         )
-        api.errorhandler(
-            JWTExtendedException,
+        api.errorhandler(JWTExtendedException)(
             lambda _: (
                 {"message": "Unauthorized"},
                 HTTPStatus.UNAUTHORIZED,
-            ),
+            )
         )
-        api.errorhandler(
-            PyJWTError,
+        api.errorhandler(PyJWTError)(
             lambda _: (
                 {"message": "Invalid token"},
                 HTTPStatus.UNPROCESSABLE_CONTENT,
-            ),
+            )
         )
 
     @staticmethod
