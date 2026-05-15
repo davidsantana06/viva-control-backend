@@ -1,8 +1,7 @@
-from werkzeug.security import generate_password_hash
-
 from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import UserEmailAlreadyInUse, UserNotFound
 from app.models import User
+from app.proxies import HashProxy
 from app.types import FindAllParams
 
 
@@ -12,7 +11,7 @@ class UserService:
         if User.find_first_by_email(dto["email"]):
             raise UserEmailAlreadyInUse()
 
-        dto["password_hash"] = generate_password_hash(dto.pop("password"))
+        dto["password_hash"] = HashProxy.hash(dto.pop("password"))
         user = User(**dto)
         User.save(user)
         return user
@@ -35,7 +34,7 @@ class UserService:
         user = cls.find_first(id)
 
         if dto.get("password"):
-            dto["password_hash"] = generate_password_hash(dto.pop("password"))
+            dto["password_hash"] = HashProxy.hash(dto.pop("password"))
 
         user.update(**dto)
         User.save(user)
