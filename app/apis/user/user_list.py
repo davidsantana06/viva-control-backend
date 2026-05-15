@@ -1,7 +1,7 @@
 from flask_restx import Resource
 from http import HTTPStatus
 
-from app.dto.user_dtos import create_user_dto, user_dto
+from app.dtos import create_user_dto, user_dto
 from app.exceptions import InvalidPayload
 from app.services import user_service
 from app.utils.api_specs import parse_find_all_args, set_find_all_parser

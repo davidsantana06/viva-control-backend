@@ -2,7 +2,6 @@ from sqlalchemy import Boolean, Column
 from sqlalchemy.ext.declarative import declared_attr
 from typing import Self
 
-from app.extensions import db
 from .timestamp_mixin import TimestampMixin
 
 

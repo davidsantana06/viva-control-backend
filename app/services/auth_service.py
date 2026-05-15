@@ -1,7 +1,7 @@
 from flask_jwt_extended import create_access_token
 from werkzeug.security import check_password_hash
 
-from app.dto.auth_dtos import LoginDto
+from app.dtos import LoginDto
 from app.exceptions import InvalidCredentials
 from app.models import User
 

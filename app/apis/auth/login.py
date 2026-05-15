@@ -1,6 +1,6 @@
 from flask_restx import Resource
 
-from app.dto.auth_dtos import access_token_dto, login_dto
+from app.dtos import access_token_dto, login_dto
 from app.exceptions import InvalidCredentials, InvalidPayload
 from app.services import auth_service
 from . import auth_ns

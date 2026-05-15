@@ -1,6 +1,6 @@
 from werkzeug.security import generate_password_hash
 
-from app.dto.user_dtos import CreateUserDto, UpdateUserDto
+from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import UserEmailAlreadyInUse, UserNotFound
 from app.models import User
 from app.types import FindAllParams

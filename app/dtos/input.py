@@ -4,15 +4,19 @@ from typing import NotRequired, TypedDict
 from app.extensions import api
 from app.types import UserRole
 
-from .mixin.lifecycle_mixin import lifecycle_mixin
 
-
-class UserDto(TypedDict):
-    id: int
-    parent_id: NotRequired[int]
-    name: str
+class LoginDto(TypedDict):
     email: str
-    role: UserRole
+    password: str
+
+
+login_dto = api.model(
+    "LoginDto",
+    LoginDto(
+        email=String(required=True, min_length=5, max_length=255),
+        password=String(required=True, min_length=8, max_length=40),
+    ),
+)
 
 
 class CreateUserDto(TypedDict):
@@ -24,27 +28,8 @@ class CreateUserDto(TypedDict):
     role: UserRole
 
 
-class UpdateUserDto(TypedDict):
-    name: str
-    email: str
-    password: NotRequired[str]
-    password_hash: NotRequired[str]
-
-
-user_dto = api.model(
-    "User",
-    UserDto(
-        id=Integer(readonly=True),
-        parent_id=Integer(),
-        name=String(),
-        email=String(),
-        role=String(enum=list(UserRole)),
-        **lifecycle_mixin,
-    ),
-)
-
 create_user_dto = api.model(
-    "CreateUser",
+    "CreateUserDto",
     CreateUserDto(
         parent_id=Integer(),
         name=String(required=True, min_length=2, max_length=50),
@@ -53,6 +38,14 @@ create_user_dto = api.model(
         role=String(required=True, enum=list(UserRole)),
     ),
 )
+
+
+class UpdateUserDto(TypedDict):
+    name: str
+    email: str
+    password: NotRequired[str]
+    password_hash: NotRequired[str]
+
 
 update_user_dto = api.model(
     "UpdateUser",
