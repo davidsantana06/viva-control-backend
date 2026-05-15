@@ -6,72 +6,84 @@ from jwt.exceptions import PyJWTError
 
 from app.apis import auth_ns, user_ns
 from app.extensions import api, cors, db, jwt, migrate
-from . import environs, paths
+
+from .environs import Environs
+from .paths import Paths
 
 
-_API_AUTHORIZATIONS = {
-    "Bearer": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "Bearer <token>",
+class Setup:
+    __API_AUTHORIZATIONS = {
+        "Bearer": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer <token>",
+        }
     }
-}
 
+    @staticmethod
+    def apply_environs(app: Flask) -> None:
+        load_dotenv(Paths.ENV_FILE)
+        app.json.sort_keys = Environs.JSON_SORT_KEYS
+        app.config.from_object(Environs)
 
-def apply_environs(app: Flask) -> None:
-    load_dotenv(paths.ENV_FILE)
-    app.json.sort_keys = environs.JSON_SORT_KEYS
-    app.config.from_object(environs)
+    @staticmethod
+    def __init_db(app: Flask) -> None:
+        db.init_app(app)
+        with app.app_context():
+            db.create_all()
 
+    @staticmethod
+    def __init_migrate(app: Flask) -> None:
+        migrate.init_app(app, db, directory=Paths.MIGRATIONS_DIR)
 
-def _init_db(app: Flask) -> None:
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
+    @staticmethod
+    def __init_jwt(app: Flask) -> None:
+        jwt.init_app(app)
 
+    @classmethod
+    def __init_api(cls, app: Flask) -> None:
+        api.init_app(
+            app,
+            title="Viva Control Backend",
+            description="Viva Control REST API",
+        )
 
-def _init_migrate(app: Flask) -> None:
-    migrate.init_app(app, db, directory=paths.MIGRATIONS_DIR)
+        api.add_namespace(auth_ns)
+        api.add_namespace(user_ns)
 
+        api.authorizations = cls.__API_AUTHORIZATIONS
 
-def _init_jwt(app: Flask) -> None:
-    jwt.init_app(app)
+        api.errorhandler(
+            InvalidHeaderError,
+            lambda _: (
+                {"message": "Invalid authorization header"},
+                HTTPStatus.UNPROCESSABLE_CONTENT,
+            ),
+        )
+        api.errorhandler(
+            JWTExtendedException,
+            lambda _: (
+                {"message": "Unauthorized"},
+                HTTPStatus.UNAUTHORIZED,
+            ),
+        )
+        api.errorhandler(
+            PyJWTError,
+            lambda _: (
+                {"message": "Invalid token"},
+                HTTPStatus.UNPROCESSABLE_CONTENT,
+            ),
+        )
 
+    @staticmethod
+    def __init_cors(app: Flask) -> None:
+        cors.init_app(app, origins=Environs.ALLOWED_HOSTS)
 
-def _init_api(app: Flask) -> None:
-    api.init_app(
-        app,
-        title="Viva Control Backend",
-        description="Viva Control REST API",
-    )
-
-    api.add_namespace(auth_ns)
-    api.add_namespace(user_ns)
-
-    api.authorizations = _API_AUTHORIZATIONS
-
-    api.errorhandler(
-        InvalidHeaderError,
-        lambda _: ({"message": "Invalid authorization header"}, HTTPStatus.UNPROCESSABLE_CONTENT),
-    )
-    api.errorhandler(
-        JWTExtendedException,
-        lambda _: ({"message": "Unauthorized"}, HTTPStatus.UNAUTHORIZED),
-    )
-    api.errorhandler(
-        PyJWTError,
-        lambda _: ({"message": "Invalid token"}, HTTPStatus.UNPROCESSABLE_CONTENT),
-    )
-
-
-def _init_cors(app: Flask) -> None:
-    cors.init_app(app, origins=environs.ALLOWED_HOSTS)
-
-
-def init_extensions(app: Flask) -> None:
-    _init_db(app)
-    _init_migrate(app)
-    _init_jwt(app)
-    _init_api(app)
-    _init_cors(app)
+    @classmethod
+    def init_extensions(cls, app: Flask) -> None:
+        cls.__init_db(app)
+        cls.__init_migrate(app)
+        cls.__init_jwt(app)
+        cls.__init_api(app)
+        cls.__init_cors(app)

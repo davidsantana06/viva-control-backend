@@ -1,16 +1,17 @@
 from os import environ
-from . import paths
+from .paths import Paths
 
 
-SQLALCHEMY_DATABASE_URI = environ.get(
-    "DATABASE_URI",
-    f"sqlite:///{paths.SQLITE_FILE}",
-)
+class Environs:
+    SQLALCHEMY_DATABASE_URI = environ.get(
+        "DATABASE_URI",
+        f"sqlite:///{Paths.SQLITE_FILE}",
+    )
 
-SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "*").split(" ")
+    ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS", "*").split(" ")
 
-JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY", "VIVA_CONTROL__by__davidsantana06")
+    JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY", "VIVA_CONTROL__by__davidsantana06")
 
-JSON_SORT_KEYS = False
+    JSON_SORT_KEYS = False

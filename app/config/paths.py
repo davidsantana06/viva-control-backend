@@ -1,14 +1,15 @@
 from pathlib import Path
 
 
-ROOT_DIR = Path(__file__).parent.parent.parent
-""" / """
+class Paths:
+    ROOT_DIR = Path(__file__).parent.parent.parent
+    """ / """
 
-MIGRATIONS_DIR = ROOT_DIR / "migrations"
-""" /migrations/ """
+    MIGRATIONS_DIR = ROOT_DIR / "migrations"
+    """ /migrations/ """
 
-ENV_FILE = ROOT_DIR / ".env"
-""" /.env """
+    ENV_FILE = ROOT_DIR / ".env"
+    """ /.env """
 
-SQLITE_FILE = ROOT_DIR / "database.sqlite3"
-""" /database.sqlite3 """
+    SQLITE_FILE = ROOT_DIR / "database.sqlite3"
+    """ /database.sqlite3 """

@@ -1,7 +1,7 @@
 from flask import Flask
-from .config.setup import apply_environs, init_extensions
+from .config import Setup
 
 
 app = Flask(__name__)
-apply_environs(app)
-init_extensions(app)
+Setup.apply_environs(app)
+Setup.init_extensions(app)
