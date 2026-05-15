@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.dtos import create_user_dto, user_dto
 from app.exceptions import InvalidPayload
-from app.services import user_service
+from app.services import UserService
 from app.utils.api_specs import parse_find_all_args, set_find_all_parser
 from . import user_ns
 
@@ -18,7 +18,7 @@ class UserList(Resource):
     @user_ns.response(*InvalidPayload.get_specs())
     def post(self):
         """Create a new user"""
-        return user_service.create(user_ns.payload), HTTPStatus.CREATED
+        return UserService.create(user_ns.payload), HTTPStatus.CREATED
 
     @user_ns.doc("list_users")
     @user_ns.expect(__find_all_parser)
@@ -26,4 +26,4 @@ class UserList(Resource):
     def get(self):
         """Get all users"""
         find_all_params = parse_find_all_args(self.__find_all_parser)
-        return user_service.find_all(find_all_params)
+        return UserService.find_all(find_all_params)

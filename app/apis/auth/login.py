@@ -2,7 +2,7 @@ from flask_restx import Resource
 
 from app.dtos import access_token_dto, login_dto
 from app.exceptions import InvalidCredentials, InvalidPayload
-from app.services import auth_service
+from app.services import AuthService
 from . import auth_ns
 
 
@@ -15,4 +15,4 @@ class Login(Resource):
     @auth_ns.response(*InvalidCredentials.get_specs())
     def post(self):
         """Authenticate and retrieve an access token"""
-        return {"access_token": auth_service.login(auth_ns.payload)}
+        return {"access_token": AuthService.login(auth_ns.payload)}

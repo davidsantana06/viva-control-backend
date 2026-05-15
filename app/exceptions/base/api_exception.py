@@ -8,4 +8,4 @@ class ApiException(HTTPException):
 
     @classmethod
     def get_specs(cls) -> ExceptionSpecs:
-        return (cls.code, cls.description)
+        return cls.code, cls.description

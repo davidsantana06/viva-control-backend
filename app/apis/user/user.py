@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.dtos import update_user_dto, user_dto
 from app.exceptions import InvalidPayload, UserNotFound
-from app.services import user_service
+from app.services import UserService
 from . import user_ns
 
 
@@ -15,7 +15,7 @@ class User(Resource):
     @user_ns.marshal_with(user_dto)
     def get(self, id: int):
         """Get a user by ID"""
-        return user_service.find_first(id)
+        return UserService.find_first(id)
 
     @user_ns.doc("update_user")
     @user_ns.expect(update_user_dto)
@@ -23,11 +23,11 @@ class User(Resource):
     @user_ns.response(*InvalidPayload.get_specs())
     def put(self, id: int):
         """Update a user by ID"""
-        return user_service.update(id, user_ns.payload)
+        return UserService.update(id, user_ns.payload)
 
     @user_ns.doc("deactivate_user")
     @user_ns.response(HTTPStatus.NO_CONTENT, "Success")
     def delete(self, id: int):
         """Deactivate a user by ID"""
-        user_service.deactivate(id)
+        UserService.deactivate(id)
         return "", HTTPStatus.NO_CONTENT
