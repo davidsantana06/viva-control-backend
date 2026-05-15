@@ -16,7 +16,7 @@ class ApiUtils:
         return g.current_user
 
     @staticmethod
-    def set_find_all_parser(ns: Namespace) -> RequestParser:
+    def build_find_all_parser(ns: Namespace) -> RequestParser:
         request_parser = ns.parser()
         request_parser.add_argument("q", location="args", help="Search term")
         request_parser.add_argument(
@@ -49,7 +49,7 @@ class ApiUtils:
         return request_parser
 
     @staticmethod
-    def build_find_all_args(request_parser: RequestParser) -> FindAllParams:
+    def build_find_all_params(request_parser: RequestParser) -> FindAllParams:
         args = request_parser.parse_args()
         return FindAllParams(
             q=args.q,

@@ -11,7 +11,7 @@ from .models import create_user_model, update_user_model, user_model
 
 @user_ns.route("/")
 class UserList(Resource):
-    __find_all_parser = ApiUtils.set_find_all_parser(user_ns)
+    __find_all_parser = ApiUtils.build_find_all_parser(user_ns)
 
     @user_ns.doc("create_user")
     @user_ns.expect(create_user_model)

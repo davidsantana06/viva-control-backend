@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
     relationship as set_relationship,
 )
 
-from app.types import CurrentUser, RoleFilter
+from app.types import CurrentUser, RoleFilter, UserRole
 
 
 class ModelUtils:
@@ -36,4 +36,8 @@ class ModelUtils:
 
     @staticmethod
     def build_role_filter(current_user: CurrentUser) -> RoleFilter:
+        user_has_admin_role = current_user.role == UserRole.ADMIN
+        if user_has_admin_role:
+            return {}
+
         return {f"{current_user.role.lower()}_id": current_user.id}
