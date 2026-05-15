@@ -7,5 +7,5 @@ auth_ns = Namespace(
     validate=True,
 )
 
-from .login import Login
-from .protected import Protected
+from .models import *
+from .resources import *

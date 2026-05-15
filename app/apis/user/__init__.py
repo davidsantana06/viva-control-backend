@@ -7,5 +7,5 @@ user_ns = Namespace(
     validate=True,
 )
 
-from .user_list import UserList
-from .user import User
+from .models import *
+from .resources import *
