@@ -1,8 +1,10 @@
 from flask_restx import Resource
 from http import HTTPStatus
 
+from app.decorators import role_required
 from app.exceptions import InvalidPayload, UserNotFound
 from app.services import UserService
+from app.types import UserRole
 from app.utils import ApiUtils
 
 from . import user_ns
@@ -17,6 +19,7 @@ class UserList(Resource):
     @user_ns.expect(create_user_model)
     @user_ns.marshal_with(user_model, code=HTTPStatus.CREATED)
     @user_ns.response(*InvalidPayload.get_specs())
+    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def post(self):
         """Create a new user"""
         return UserService.create(user_ns.payload), HTTPStatus.CREATED
@@ -24,6 +27,7 @@ class UserList(Resource):
     @user_ns.doc("list_users")
     @user_ns.expect(__find_all_parser)
     @user_ns.marshal_list_with(user_model)
+    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self):
         """Get all users"""
         find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
@@ -36,6 +40,7 @@ class UserList(Resource):
 class User(Resource):
     @user_ns.doc("get_user")
     @user_ns.marshal_with(user_model)
+    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self, id: int):
         """Get a user by ID"""
         return UserService.find_first(id)
@@ -44,12 +49,14 @@ class User(Resource):
     @user_ns.expect(update_user_model)
     @user_ns.marshal_with(user_model)
     @user_ns.response(*InvalidPayload.get_specs())
+    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def patch(self, id: int):
         """Update a user by ID"""
         return UserService.update(id, user_ns.payload)
 
     @user_ns.doc("deactivate_user")
     @user_ns.response(HTTPStatus.NO_CONTENT, "Success")
+    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def delete(self, id: int):
         """Deactivate a user by ID"""
         UserService.deactivate(id)
