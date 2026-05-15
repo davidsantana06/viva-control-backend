@@ -1,7 +1,16 @@
 from dataclasses import dataclass
 from enum import StrEnum
 from sqlalchemy import ColumnElement, UnaryExpression
-from typing import Literal
+from typing import Literal, NotRequired, TypedDict
+
+
+# dict_
+
+class RoleFilter(TypedDict):
+    distributor_id: NotRequired[int]
+    seller_id: NotRequired[int]
+
+# - - -
 
 
 # literal_
@@ -28,6 +37,12 @@ class UserRole(StrEnum):
 
 
 # dataclass
+
+@dataclass(frozen=True)
+class CurrentUser:
+    id: int
+    role: "UserRole"
+
 
 @dataclass(frozen=True)
 class FindAllParams:

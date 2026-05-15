@@ -1,11 +1,20 @@
+from flask import g
 from flask_restx import Namespace
 from flask_restx.reqparse import RequestParser
 from typing import get_args
 
-from app.types import FindAllParams, SortOrder
+from app.types import CurrentUser, FindAllParams, SortOrder, UserRole
 
 
 class ApiUtils:
+    @staticmethod
+    def bind_current_user(id: int, role: UserRole) -> None:
+        g.current_user = CurrentUser(id, role)
+
+    @staticmethod
+    def resolve_current_user() -> CurrentUser:
+        return g.current_user
+
     @staticmethod
     def set_find_all_parser(ns: Namespace) -> RequestParser:
         request_parser = ns.parser()
