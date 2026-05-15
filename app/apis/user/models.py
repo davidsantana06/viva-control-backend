@@ -25,7 +25,7 @@ create_user_model = user_ns.model(
         name=String(required=True, min_length=2, max_length=50),
         email=String(required=True, min_length=5, max_length=255),
         password=String(required=True, min_length=8, max_length=40),
-        role=String(required=True, enum=list(UserRole)),
+        role=String(required=True, enum=[UserRole.DISTRIBUTOR, UserRole.SELLER]),
     ),
 )
 
