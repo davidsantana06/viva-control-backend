@@ -1,2 +1,2 @@
-from .auth_api import auth_ns
-from .user_api import user_ns
+from .auth import auth_ns
+from .user import user_ns
