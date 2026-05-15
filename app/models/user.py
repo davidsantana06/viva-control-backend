@@ -29,7 +29,7 @@ class User(db.Model, ModelMixin, LifecycleMixin):
 
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:
-        return cls.query.filter(cls.id == id).first()
+        return cls.query.filter(cls.id == id, cls.is_active.is_(True)).first()
 
     @classmethod
     def find_first_by_email(cls, email: str) -> Self | None:
