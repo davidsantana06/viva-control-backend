@@ -6,14 +6,15 @@ from app.types import CurrentUser, UserRole
 from app.utils import ApiUtils
 
 
-def roles_required(*roles: UserRole):
+def role_required(*roles: UserRole):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             JwtProxy.verify_or_raise()
             claims = JwtProxy.get_claims()
 
-            if claims["role"] not in roles:
+            role_not_allowed = claims["role"] not in roles
+            if role_not_allowed:
                 raise RoleNotAllowed()
 
             current_user = CurrentUser(JwtProxy.get_identity(), claims["role"])
@@ -21,6 +22,3 @@ def roles_required(*roles: UserRole):
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
-
-distributor_required = roles_required(UserRole.DISTRIBUTOR)

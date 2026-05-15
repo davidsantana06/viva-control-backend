@@ -8,6 +8,20 @@ class LoginDto(TypedDict):
     password: str
 
 
+class CreateProductDto(TypedDict):
+    name: str
+    sku: str
+    description: NotRequired[str]
+    suggested_price: float
+
+
+class UpdateProductDto(TypedDict):
+    name: NotRequired[str]
+    sku: NotRequired[str]
+    description: NotRequired[str]
+    suggested_price: NotRequired[float]
+
+
 class CreateUserDto(TypedDict):
     parent_id: NotRequired[int]
     name: str

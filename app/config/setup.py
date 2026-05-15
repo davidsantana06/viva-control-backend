@@ -5,7 +5,7 @@ from http import HTTPStatus
 from jwt.exceptions import PyJWTError
 import json
 
-from app.apis import auth_ns, user_ns
+from app.apis import auth_ns, product_ns, user_ns
 from app.dtos import CreateUserDto
 from app.extensions import api, cors, db, jwt, migrate
 from app.services import UserService
@@ -53,6 +53,7 @@ class Setup:
         )
 
         api.add_namespace(auth_ns)
+        api.add_namespace(product_ns)
         api.add_namespace(user_ns)
 
         api.authorizations = cls.__API_AUTHORIZATIONS

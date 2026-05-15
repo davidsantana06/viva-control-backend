@@ -15,7 +15,8 @@ class ModelMixin(Model):
         return ModelUtils.set_primary_key_column()
 
     def update(self, **kwargs) -> None:
-        self.__dict__.update(kwargs)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
     @staticmethod
     def save(model: Self) -> None:

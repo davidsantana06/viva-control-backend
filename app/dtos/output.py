@@ -7,6 +7,14 @@ class AccessTokenDto(TypedDict):
     access_token: str
 
 
+class ProductDto(TypedDict):
+    id: int
+    name: str
+    sku: str
+    description: NotRequired[str]
+    suggested_price: float
+
+
 class UserDto(TypedDict):
     id: int
     parent_id: NotRequired[int]
