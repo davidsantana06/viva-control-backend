@@ -1,9 +1,0 @@
-ONE_AT_AND_TWENTY_NINE_CHARACTERS = "@" + "*" * 29
-
-FOUR_NUMBERS = "0" * 4
-
-FOUR_NUMBERS_AND_ONE_DECIMAL = "^[0-9]{1,4}([.][0-9]{0,1})?$"
-
-FOUR_NUMBERS_AND_TWO_DECIMALS = "^[0-9]{1,4}([.][0-9]{0,2})?$"
-
-FIVE_NUMBERS = "0" * 5

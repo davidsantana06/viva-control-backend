@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.exceptions import InvalidPayload, UserNotFound
 from app.services import UserService
-from app.utils.api_specs import parse_find_all_args, set_find_all_parser
+from app.utils import ApiUtils
 
 from . import user_ns
 from .models import create_user_model, update_user_model, user_model
@@ -11,7 +11,7 @@ from .models import create_user_model, update_user_model, user_model
 
 @user_ns.route("/")
 class UserList(Resource):
-    __find_all_parser = set_find_all_parser(user_ns)
+    __find_all_parser = ApiUtils.set_find_all_parser(user_ns)
 
     @user_ns.doc("create_user")
     @user_ns.expect(create_user_model)
@@ -26,7 +26,7 @@ class UserList(Resource):
     @user_ns.marshal_list_with(user_model)
     def get(self):
         """Get all users"""
-        find_all_params = parse_find_all_args(self.__find_all_parser)
+        find_all_params = ApiUtils.parse_find_all_args(self.__find_all_parser)
         return UserService.find_all(find_all_params)
 
 

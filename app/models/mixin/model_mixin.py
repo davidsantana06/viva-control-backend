@@ -6,13 +6,13 @@ from typing import Self
 
 from app.extensions import db
 from app.types import Filter, Ordering, SortOrder
-from app.utils.model_mappers import set_primary_key_column
+from app.utils import ModelUtils
 
 
 class ModelMixin(Model):
     @declared_attr
     def id(cls) -> Mapped[int]:
-        return set_primary_key_column()
+        return ModelUtils.set_primary_key_column()
 
     def update(self, **kwargs) -> None:
         self.__dict__.update(kwargs)

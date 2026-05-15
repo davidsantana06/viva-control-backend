@@ -10,13 +10,13 @@ from app.extensions import db
 from app.models.mixin.lifecycle_mixin import LifecycleMixin
 from app.models.mixin.model_mixin import ModelMixin
 from app.types import FindAllParams
-from app.utils.model_mappers import set_foreign_key_column
+from app.utils import ModelUtils
 
 
 class User(db.Model, ModelMixin, LifecycleMixin):
     __tablename__ = "users"
 
-    parent_id: Mapped[int | None] = set_foreign_key_column("users", nullable=True)
+    parent_id: Mapped[int | None] = ModelUtils.set_foreign_key_column("users", nullable=True)
     name: Mapped[str] = set_mapped_column(String(50))
     email: Mapped[str] = set_mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = set_mapped_column(CHAR(60))
