@@ -26,7 +26,7 @@ class UserList(Resource):
     @user_ns.marshal_list_with(user_model)
     def get(self):
         """Get all users"""
-        find_all_params = ApiUtils.parse_find_all_args(self.__find_all_parser)
+        find_all_params = ApiUtils.build_find_all_args(self.__find_all_parser)
         return UserService.find_all(find_all_params)
 
 
