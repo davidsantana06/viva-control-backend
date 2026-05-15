@@ -44,7 +44,7 @@ class User(Resource):
     @user_ns.expect(update_user_model)
     @user_ns.marshal_with(user_model)
     @user_ns.response(*InvalidPayload.get_specs())
-    def put(self, id: int):
+    def patch(self, id: int):
         """Update a user by ID"""
         return UserService.update(id, user_ns.payload)
 
