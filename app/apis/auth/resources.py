@@ -1,7 +1,8 @@
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 
 from app.exceptions import InvalidCredentials, InvalidPayload
+from app.proxies import JwtProxy
 from app.services import AuthService
 
 from . import auth_ns
@@ -26,4 +27,4 @@ class Protected(Resource):
     @jwt_required()
     def get(self):
         """Protected route example"""
-        return {"logged_in_as": get_jwt_identity()}
+        return {"logged_in_as": JwtProxy.get_identity()}

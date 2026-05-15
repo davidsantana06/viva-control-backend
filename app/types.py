@@ -10,6 +10,11 @@ class RoleFilter(TypedDict):
     distributor_id: NotRequired[int]
     seller_id: NotRequired[int]
 
+
+class JwtClaims(TypedDict):
+    name: str
+    role: "UserRole"
+
 # - - -
 
 

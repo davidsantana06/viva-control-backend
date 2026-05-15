@@ -3,13 +3,13 @@ from flask_restx import Namespace
 from flask_restx.reqparse import RequestParser
 from typing import get_args
 
-from app.types import CurrentUser, FindAllParams, SortOrder, UserRole
+from app.types import CurrentUser, FindAllParams, SortOrder
 
 
 class ApiUtils:
     @staticmethod
-    def bind_current_user(id: int, role: UserRole) -> None:
-        g.current_user = CurrentUser(id, role)
+    def bind_current_user(current_user: CurrentUser) -> None:
+        g.current_user = current_user
 
     @staticmethod
     def resolve_current_user() -> CurrentUser:
