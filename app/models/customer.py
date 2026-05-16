@@ -34,16 +34,15 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
 
     @classmethod
     def find_all(cls, params: FindAllParams, role_filter: RoleFilter) -> list[Self]:
-        q_filter = cls._mount_q_filter(params.q, cls.name, cls.document)
-        ordering = cls._mount_ordering(params.sort, params.order)
-        offset = cls._calculate_offset(params.page, params.per_page)
-
         return (
             cls.query
             .filter_by(**role_filter)
-            .filter(q_filter, cls.is_active.is_(True))
-            .order_by(ordering)
-            .offset(offset)
+            .filter(
+                cls._mount_q_filter(params.q, cls.name, cls.document),
+                cls.is_active.is_(True)
+            )
+            .order_by(cls._mount_ordering(params.sort, params.order))
+            .offset(offset = cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)
             .all()
         )

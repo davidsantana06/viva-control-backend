@@ -19,15 +19,14 @@ class PaymentMethod(db.Model, ModelMixin, LifecycleMixin):
 
     @classmethod
     def find_all(cls, params: FindAllParams) -> list[Self]:
-        q_filter = cls._mount_q_filter(params.q, cls.name)
-        ordering = cls._mount_ordering(params.sort, params.order)
-        offset = cls._calculate_offset(params.page, params.per_page)
-
         return (
             cls.query
-            .filter(q_filter, cls.is_active.is_(True))
-            .order_by(ordering)
-            .offset(offset)
+            .filter(
+                cls._mount_q_filter(params.q, cls.name),
+                cls.is_active.is_(True)
+            )
+            .order_by(cls._mount_ordering(params.sort, params.order))
+            .offset(cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)
             .all()
         )
