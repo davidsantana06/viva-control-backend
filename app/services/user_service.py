@@ -1,8 +1,8 @@
 from app.dtos import CreateUserDto, UpdateUserDto
-from app.exceptions import UserEmailAlreadyInUse, UserNotFound
+from app.exceptions import UserAdminDeactivationNotAllowed, UserEmailAlreadyInUse, UserNotFound
 from app.models import User
 from app.proxies import HashProxy
-from app.types import FindAllParams
+from app.types import FindAllParams, UserRole
 
 
 class UserService:
@@ -43,5 +43,10 @@ class UserService:
     @classmethod
     def deactivate(cls, id: int) -> None:
         user = cls.find_first(id)
+
+        user_is_admin = user.role == UserRole.ADMIN
+        if user_is_admin:
+            raise UserAdminDeactivationNotAllowed()
+
         User.deactivate(user)
         User.save(user)
