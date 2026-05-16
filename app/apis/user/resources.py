@@ -28,7 +28,7 @@ class UserList(Resource):
         user_model,
         EmailAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    @role_required(UserRole.ADMIN)
     def post(self):
         """Create a new user"""
         return UserService.create(user_ns.payload), HTTPStatus.CREATED
@@ -57,13 +57,13 @@ class User(Resource):
         UserNotFound,
         EmailAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    @role_required(UserRole.ADMIN)
     def patch(self, id: int):
         """Update a user by ID"""
         return UserService.update(id, user_ns.payload)
 
     @deactivate_resource(user_ns, UserNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a user by ID"""
         UserService.deactivate(id)

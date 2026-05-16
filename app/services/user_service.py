@@ -2,13 +2,14 @@ from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import AdminDeactivationNotAllowed, EmailAlreadyInUse, UserNotFound
 from app.models import User
 from app.proxies import HashProxy
-from app.types import FindAllParams, UserRole
+from app.types import FindAllParams
 
 
 class UserService:
     @staticmethod
     def create(dto: CreateUserDto) -> User:
-        if User.find_first_by_email(dto["email"]):
+        other_user = User.find_first_by_email(dto["email"])
+        if other_user:
             raise EmailAlreadyInUse()
 
         dto["password_hash"] = HashProxy.hash(dto.pop("password"))

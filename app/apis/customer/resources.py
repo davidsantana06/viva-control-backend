@@ -23,11 +23,14 @@ class CustomerList(Resource):
     __find_all_parser = ApiUtils.build_find_all_parser(customer_ns)
 
     @create_resource(customer_ns, create_customer_model, customer_model)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def post(self):
         """Create a new customer"""
         current_user = ApiUtils.resolve_current_user()
-        return CustomerService.create(customer_ns.payload, current_user), HTTPStatus.CREATED
+        return (
+            CustomerService.create(customer_ns.payload, current_user),
+            HTTPStatus.CREATED,
+        )
 
     @list_resource(customer_ns, __find_all_parser, customer_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
@@ -48,15 +51,20 @@ class CustomerResource(Resource):
         current_user = ApiUtils.resolve_current_user()
         return CustomerService.find_first(id, current_user)
 
-    @update_resource(customer_ns, update_customer_model, customer_model, CustomerNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    @update_resource(
+        customer_ns,
+        update_customer_model,
+        customer_model,
+        CustomerNotFound,
+    )
+    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def patch(self, id: int):
         """Update a customer by ID"""
         current_user = ApiUtils.resolve_current_user()
         return CustomerService.update(id, customer_ns.payload, current_user)
 
     @deactivate_resource(customer_ns, CustomerNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def delete(self, id: int):
         """Deactivate a customer by ID"""
         current_user = ApiUtils.resolve_current_user()
