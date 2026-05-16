@@ -1,10 +1,28 @@
+from app.types import CurrentUser, UserRole
+
+
 class DtoUtils:
-    ONE_AT_AND_TWENTY_NINE_CHARACTERS = "@" + "*" * 29
+    @staticmethod
+    def __inject_distributor_id(dto: dict, current_user: CurrentUser) -> None:
+        dto["distributor_id"] = current_user.id
 
-    FOUR_NUMBERS = "0" * 4
+    @staticmethod
+    def __inject_distributor_and_seller_id(
+        dto: dict,
+        current_user: CurrentUser,
+    ) -> None:
+        dto["seller_id"] = current_user.id
+        dto["distributor_id"] = current_user.parent_id
 
-    FOUR_NUMBERS_AND_ONE_DECIMAL = "^[0-9]{1,4}([.][0-9]{0,1})?$"
-
-    FOUR_NUMBERS_AND_TWO_DECIMALS = "^[0-9]{1,4}([.][0-9]{0,2})?$"
-
-    FIVE_NUMBERS = "0" * 5
+    @classmethod
+    def inject_user_ids(
+        cls,
+        dto: dict,
+        current_user: CurrentUser,
+    ) -> None:
+        strategies = {
+            UserRole.DISTRIBUTOR: cls.__inject_distributor_id,
+            UserRole.SELLER: cls.__inject_distributor_and_seller_id,
+        }
+        strategy = strategies[current_user.role]
+        strategy(dto, current_user)

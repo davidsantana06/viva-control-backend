@@ -1,20 +1,14 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
 from app.exceptions import CustomerNotFound
-from app.models import Customer, User
-from app.types import CurrentUser, FindAllParams, UserRole
-from app.utils import ModelUtils
+from app.models import Customer
+from app.types import CurrentUser, FindAllParams
+from app.utils import DtoUtils, ModelUtils
 
 
 class CustomerService:
     @staticmethod
     def create(dto: CreateCustomerDto, current_user: CurrentUser) -> Customer:
-        if current_user.is_seller:
-            seller = User.find_first_by_id(current_user.id)
-            dto["seller_id"] = current_user.id
-            dto["distributor_id"] = seller.parent_id
-        elif current_user.is_distributor:
-            dto["distributor_id"] = current_user.id
-
+        DtoUtils.inject_user_ids(dto, current_user)
         customer = Customer(**dto)
         Customer.save(customer)
         return customer

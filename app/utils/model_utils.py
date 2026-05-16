@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
     relationship as set_relationship,
 )
 
-from app.types import CurrentUser, RoleFilter, UserRole
+from app.types import CurrentUser, RoleFilter
 
 
 class ModelUtils:
