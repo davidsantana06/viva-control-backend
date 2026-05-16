@@ -5,10 +5,11 @@ from http import HTTPStatus
 from jwt.exceptions import PyJWTError
 import json
 
-from app.apis import auth_ns, product_ns, user_ns
-from app.dtos import CreateUserDto
+from app.apis import auth_ns, payment_method_ns, product_ns, user_ns
+from app.dtos import CreatePaymentMethodDto, CreateUserDto
 from app.extensions import api, cors, db, jwt, migrate
-from app.services import UserService
+from app.models import PaymentMethod, User
+from app.services import PaymentMethodService, UserService
 
 from .environs import Environs
 from .paths import Paths
@@ -53,6 +54,7 @@ class Setup:
         )
 
         api.add_namespace(auth_ns)
+        api.add_namespace(payment_method_ns)
         api.add_namespace(product_ns)
         api.add_namespace(user_ns)
 
@@ -90,16 +92,32 @@ class Setup:
         cls.__init_cors(app)
 
     @staticmethod
+    def create_default_payment_methods_if_absent(app: Flask) -> None:
+        def retrieve_dtos() -> list[CreatePaymentMethodDto]:
+            with open(Paths.DEFAULT_PAYMENT_METHODS_JSON_FILE, encoding="utf-8") as file:
+                return json.load(file)
+        
+        dtos = retrieve_dtos()
+        with app.app_context():
+            payment_method = PaymentMethod.find_first_by_id(1)
+            if payment_method:
+                return
+            
+            for dto in dtos:
+                PaymentMethodService.create(dto)
+
+    @staticmethod
     def create_admin_user_if_absent(app: Flask) -> None:
         def retrieve_dto() -> CreateUserDto:
             with open(Paths.ADMIN_USER_JSON_FILE, encoding="utf-8") as file:
                 return json.load(file)
 
-        try: UserService.find_first(1)
-        except: return
-
         dto = retrieve_dto()
         dto["email"] = Environs.ADMIN_EMAIL
         dto["password"] = Environs.ADMIN_PASSWORD
         with app.app_context():
+            user = User.find_first_by_id(1)
+            if user:
+                return
+            
             UserService.create(dto)

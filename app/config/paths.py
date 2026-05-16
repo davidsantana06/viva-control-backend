@@ -19,3 +19,6 @@ class Paths:
 
     ADMIN_USER_JSON_FILE = FIXTURES_DIR / "01_admin_user.json"
     """ /fixtures/01_admin_user.json """
+
+    DEFAULT_PAYMENT_METHODS_JSON_FILE = FIXTURES_DIR / "02_default_payment_methods.json"
+    """ /fixtures/02_default_payment_methods.json """

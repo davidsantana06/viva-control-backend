@@ -7,6 +7,11 @@ class AccessTokenDto(TypedDict):
     access_token: str
 
 
+class PaymentMethodDto(TypedDict):
+    id: int
+    name: str
+
+
 class ProductDto(TypedDict):
     id: int
     name: str

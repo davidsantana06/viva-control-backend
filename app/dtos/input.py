@@ -8,6 +8,14 @@ class LoginDto(TypedDict):
     password: str
 
 
+class CreatePaymentMethodDto(TypedDict):
+    name: str
+
+
+class UpdatePaymentMethodDto(TypedDict):
+    name: NotRequired[str]
+
+
 class CreateProductDto(TypedDict):
     name: str
     sku: str
