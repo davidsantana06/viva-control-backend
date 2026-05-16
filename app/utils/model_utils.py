@@ -44,7 +44,7 @@ class ModelUtils:
     @staticmethod
     def build_distributor_filter(
         current_user: CurrentUser,
-        user_scoped: bool,
+        user_scoped: bool = False,
     ) -> DistributorFilter | DistributorOnlyFilter:
         user_filter = {"distributor_id": current_user.id}
         if user_scoped:
@@ -62,7 +62,7 @@ class ModelUtils:
     def build_user_filter(
         cls,
         current_user: CurrentUser,
-        user_scoped: bool,
+        user_scoped: bool = False,
     ) -> UserFilter:
         strategies = {
             UserRole.DISTRIBUTOR: cls.build_distributor_filter,

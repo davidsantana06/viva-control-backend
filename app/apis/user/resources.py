@@ -62,11 +62,13 @@ class User(Resource):
     @role_required(UserRole.ADMIN)
     def patch(self, id: int):
         """Update a user by ID"""
-        return UserService.update(id, user_ns.payload)
+        current_user = ApiUtils.resolve_current_user()
+        return UserService.update(id, user_ns.payload, current_user)
 
     @deactivate_resource(user_ns, UserNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a user by ID"""
-        UserService.deactivate(id)
+        current_user = ApiUtils.resolve_current_user()
+        UserService.deactivate(id, current_user)
         return "", HTTPStatus.NO_CONTENT

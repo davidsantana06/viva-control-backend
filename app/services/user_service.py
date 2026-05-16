@@ -34,8 +34,8 @@ class UserService:
         return user
 
     @classmethod
-    def update(cls, id: int, dto: UpdateUserDto) -> User:
-        user = cls.find_first(id)
+    def update(cls, id: int, dto: UpdateUserDto, current_user: CurrentUser) -> User:
+        user = cls.find_first(id, current_user)
 
         if dto.get("password"):
             dto["password_hash"] = Security.hash_password(dto.pop("password"))
@@ -45,8 +45,8 @@ class UserService:
         return user
 
     @classmethod
-    def deactivate(cls, id: int) -> None:
-        user = cls.find_first(id)
+    def deactivate(cls, id: int, current_user: CurrentUser) -> None:
+        user = cls.find_first(id, current_user)
 
         if user.is_admin:
             raise AdminDeactivationNotAllowed()
