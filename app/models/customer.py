@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
 from app.extensions import db
-from app.types import FindAllParams, RoleFilter
+from app.types import FindAllParams, UserFilter
 from app.utils import ModelUtils
 
 from .mixin.lifecycle_mixin import LifecycleMixin
@@ -25,19 +25,19 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
     notes: Mapped[str | None] = set_mapped_column(Text, nullable=True)
 
     @classmethod
-    def find_first_by_id(cls, id: int, role_filter: RoleFilter) -> Self | None:
+    def find_first_by_id(cls, id: int, user_filter: UserFilter = {}) -> Self | None:
         return (
             cls.query
-            .filter_by(**role_filter)
+            .filter_by(**user_filter)
             .filter(cls.id == id, cls.is_active.is_(True))
             .first()
         )
 
     @classmethod
-    def find_all(cls, params: FindAllParams, role_filter: RoleFilter) -> list[Self]:
+    def find_all(cls, params: FindAllParams, user_filter: UserFilter = {}) -> list[Self]:
         return (
             cls.query
-            .filter_by(**role_filter)
+            .filter_by(**user_filter)
             .filter(
                 cls._mount_q_filter(params.q, cls.name, cls.document),
                 cls.is_active.is_(True)

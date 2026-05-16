@@ -8,20 +8,20 @@ from app.utils import DtoUtils, ModelUtils
 class CustomerService:
     @staticmethod
     def create(dto: CreateCustomerDto, current_user: CurrentUser) -> Customer:
-        DtoUtils.inject_distributor_and_or_seller_ids(dto, current_user)
+        DtoUtils.inject_user_ids(dto, current_user)
         customer = Customer(**dto)
         Customer.save(customer)
         return customer
 
     @staticmethod
     def find_all(params: FindAllParams, current_user: CurrentUser) -> list[Customer]:
-        role_filter = ModelUtils.build_role_filter(current_user)
-        return Customer.find_all(params, role_filter)
+        user_filter = ModelUtils.build_user_filter(current_user)
+        return Customer.find_all(params, user_filter)
 
     @staticmethod
     def find_first(id: int, current_user: CurrentUser) -> Customer:
-        role_filter = ModelUtils.build_role_filter(current_user)
-        customer = Customer.find_first_by_id(id, role_filter)
+        user_filter = ModelUtils.build_user_filter(current_user)
+        customer = Customer.find_first_by_id(id, user_filter)
 
         if not customer:
             raise CustomerNotFound()
@@ -29,7 +29,9 @@ class CustomerService:
         return customer
 
     @classmethod
-    def update(cls, id: int, dto: UpdateCustomerDto, current_user: CurrentUser) -> Customer:
+    def update(
+        cls, id: int, dto: UpdateCustomerDto, current_user: CurrentUser
+    ) -> Customer:
         customer = cls.find_first(id, current_user)
         customer.update(**dto)
         Customer.save(customer)

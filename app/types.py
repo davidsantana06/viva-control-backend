@@ -1,22 +1,24 @@
 from dataclasses import dataclass
 from enum import StrEnum
 from sqlalchemy import ColumnElement, UnaryExpression
-from typing import Literal, NotRequired, TypedDict
+from typing import Literal, TypedDict, Union
 
 
 # dict_
 
-class ParentFilter(TypedDict):
-    parent_id: int
+class DistributorFilter(TypedDict):
+    distributor_id: int
 
 
-class RoleFilter(TypedDict):
-    distributor_id: NotRequired[int]
-    seller_id: NotRequired[int]
+class SellerFilter(TypedDict):
+    seller_id: int
+
+
+UserFilter = Union[DistributorFilter, SellerFilter]
 
 
 class JwtClaims(TypedDict):
-    parent_id: int
+    distributor_id: int
     name: str
     role: "UserRole"
     is_admin: bool
@@ -60,7 +62,7 @@ class UserRole(StrEnum):
 @dataclass(frozen=True)
 class CurrentUser:
     id: int
-    parent_id: int
+    distributor_id: int
     name: str
     role: "UserRole"
     is_admin: bool

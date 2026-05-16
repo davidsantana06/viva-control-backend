@@ -51,7 +51,7 @@ class UpdateProductDto(TypedDict):
 
 
 class CreateUserDto(TypedDict):
-    parent_id: NotRequired[int]
+    distributor_id: NotRequired[int]
     name: str
     email: str
     password: NotRequired[str]

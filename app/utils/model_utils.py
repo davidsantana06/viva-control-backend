@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
     relationship as set_relationship,
 )
 
-from app.types import CurrentUser, ParentFilter, RoleFilter
+from app.types import CurrentUser, DistributorFilter, SellerFilter, UserFilter, UserRole
 
 
 class ModelUtils:
@@ -34,18 +34,22 @@ class ModelUtils:
     def set_parent_relationship(back_populates: str) -> Relationship:
         return set_relationship(back_populates=back_populates)
 
+    @staticmethod
+    def build_distributor_filter(current_user: CurrentUser) -> DistributorFilter:
+        return {"distributor_id": current_user.id}
+
+    @staticmethod
+    def __build_seller_filter(current_user: CurrentUser) -> SellerFilter:
+        return {"seller_id": current_user.id}
+
     @classmethod
-    def build_parent_filter(cls, current_user: CurrentUser) -> ParentFilter:
-        if not current_user.is_distributor:
-            return {}
-
-        return {"parent_id": current_user.id}
-
-    @classmethod
-    def build_role_filter(cls, current_user: CurrentUser) -> RoleFilter:
-        can_filter = current_user.is_distributor or current_user.is_seller
-        if not can_filter:
-            return {}
-
-        column = f"{current_user.role.lower()}_id"
-        return {column: current_user.id}
+    def build_user_filter(
+        cls,
+        current_user: CurrentUser,
+    ) -> UserFilter:
+        strategies = {
+            UserRole.DISTRIBUTOR: cls.build_distributor_filter,
+            UserRole.SELLER: cls.__build_seller_filter,
+        }
+        strategy = strategies.get(current_user.role, lambda _: {})
+        return strategy(current_user)

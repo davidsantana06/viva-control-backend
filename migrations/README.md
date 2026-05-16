@@ -48,13 +48,13 @@ Dois grupos de campos violam a 3FN conscientemente, com justificativa registrada
 
 **Campos calculados persistidos como snapshot financeiro** — `net_amount` em `orders` e `total_price` em `order_items` são deriváveis de outros campos, mas são gravados no momento da venda e nunca recalculados. Isso garante que alterações futuras no preço sugerido, no percentual de desconto ou em regras de cálculo não alterem retroativamente o valor registrado na transação.
 
-**Colunas de escopo propagadas** — `distributor_id` e `seller_id` aparecem em `customers` e `orders` mesmo que a relação entre vendedor e distribuidor já exista via `parent_id` em `users`. A propagação evita JOINs recursivos na hierarquia a cada consulta de escopo de acesso, mantendo as queries de isolamento multi-tenant simples e diretas.
+**Colunas de escopo propagadas** — `distributor_id` e `seller_id` aparecem em `customers` e `orders` mesmo que a relação entre vendedor e distribuidor já exista via `distributor_id` em `users`. A propagação evita JOINs recursivos na hierarquia a cada consulta de escopo de acesso, mantendo as queries de isolamento multi-tenant simples e diretas.
 
 ### Demais Convenções
 
 | Convenção                         | Decisão                                                                                                                                                                           |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Hierarquia extensível             | `users.parent_id` é auto-referência; novos níveis (ex.: gerente) não exigem alteração de schema — apenas um novo valor de `role`                                                  |
+| Hierarquia extensível             | `users.distributor_id` é auto-referência; novos níveis (ex.: gerente) não exigem alteração de schema — apenas um novo valor de `role`                                                  |
 | Catálogo global, estoque local    | Produto cadastrado uma vez em `products`; posição de estoque e mínimo controlados por distribuidor em `distributor_stocks` com `UNIQUE(product_id, distributor_id)`               |
 | Snapshot de preço                 | `order_items.unit_price` pode diferir de `products.suggested_price`; o valor fixado na venda é o que vale                                                                         |
 | Soft delete universal             | Registros nunca são excluídos fisicamente — inativação via `is_active = FALSE` preserva histórico e integridade referencial                                                       |

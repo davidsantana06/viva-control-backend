@@ -15,7 +15,7 @@ class JwtProxy:
         return create_access_token(
             identity=str(user.id),
             additional_claims=JwtClaims(
-                parent_id=user.parent_id,
+                distributor_id=user.distributor_id,
                 name=user.name,
                 role=user.role,
                 is_admin=user.is_admin,

@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
 from typing import Self
 
 from app.extensions import db
-from app.types import FindAllParams, ParentFilter, UserRole
+from app.types import DistributorFilter, FindAllParams, UserRole
 from app.utils import ModelUtils
 
 from .mixin.lifecycle_mixin import LifecycleMixin
@@ -17,15 +17,15 @@ from .mixin.model_mixin import ModelMixin
 class User(db.Model, ModelMixin, LifecycleMixin):
     __tablename__ = "users"
 
-    parent_id: Mapped[int | None] = ModelUtils.set_foreign_key_column("users", nullable=True)
+    distributor_id: Mapped[int | None] = ModelUtils.set_foreign_key_column("users", nullable=True)
     name: Mapped[str] = set_mapped_column(String(50))
     email: Mapped[str] = set_mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = set_mapped_column(CHAR(60))
     role: Mapped[str] = set_mapped_column(String(11))
 
-    parent: Mapped["User | None"] = set_relationship(
+    distributor: Mapped["User | None"] = set_relationship(
         "User",
-        primaryjoin="foreign(User.parent_id) == User.id",
+        primaryjoin="foreign(User.distributor_id) == User.id",
     )
 
     @property
@@ -35,16 +35,20 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     @property
     def is_distributor(self) -> bool:
         return self.role == UserRole.DISTRIBUTOR
-    
+
     @property
     def is_seller(self) -> bool:
         return self.role == UserRole.SELLER
 
     @classmethod
-    def find_first_by_id(cls, id: int, parent_filter: ParentFilter = {}) -> Self | None:
+    def find_first_by_id(
+        cls,
+        id: int,
+        distributor_filter: DistributorFilter = {}
+    ) -> Self | None:
         return (
             cls.query
-            .filter_by(**parent_filter)
+            .filter_by(**distributor_filter)
             .filter(cls.id == id, cls.is_active.is_(True))
             .first()
         )
@@ -54,10 +58,14 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         return cls.query.filter(cls.email == email).first()
 
     @classmethod
-    def find_all(cls, params: FindAllParams, parent_filter: ParentFilter) -> list[Self]:
+    def find_all(
+        cls,
+        params: FindAllParams,
+        distributor_filter: DistributorFilter = {}
+    ) -> list[Self]:
         return (
             cls.query
-            .filter_by(**parent_filter)
+            .filter_by(**distributor_filter)
             .filter(
                 cls._mount_q_filter(params.q, cls.name, cls.email),
                 cls.is_active.is_(True)

@@ -3,6 +3,7 @@ from flask import Flask
 from flask_jwt_extended.exceptions import InvalidHeaderError, JWTExtendedException
 from http import HTTPStatus
 from jwt.exceptions import PyJWTError
+from sqlalchemy.exc import OperationalError
 import json
 
 from app.apis import auth_ns, customer_ns, payment_method_ns, product_ns, user_ns
@@ -93,6 +94,25 @@ class Setup:
         cls.__init_cors(app)
 
     @staticmethod
+    def create_admin_user_if_absent(app: Flask) -> None:
+        def retrieve_dto() -> CreateUserDto:
+            with open(Paths.ADMIN_USER_JSON_FILE, encoding="utf-8") as file:
+                return json.load(file)
+
+        dto = retrieve_dto()
+        dto["email"] = Environs.ADMIN_EMAIL
+        dto["password"] = Environs.ADMIN_PASSWORD
+        with app.app_context():
+            try: 
+                user = User.find_first_by_id(1)
+                if user:
+                    return
+            except OperationalError:
+                return
+
+            UserService.create(dto)
+
+    @staticmethod
     def create_default_payment_methods_if_absent(app: Flask) -> None:
         def retrieve_dtos() -> list[CreatePaymentMethodDto]:
             with open(
@@ -103,25 +123,12 @@ class Setup:
         
         dtos = retrieve_dtos()
         with app.app_context():
-            payment_method = PaymentMethod.find_first_by_id(1)
-            if payment_method:
+            try: 
+                payment_method = PaymentMethod.find_first_by_id(1)
+                if payment_method:
+                    return
+            except OperationalError:
                 return
-            
+
             for dto in dtos:
                 PaymentMethodService.create(dto)
-
-    @staticmethod
-    def create_admin_user_if_absent(app: Flask) -> None:
-        def retrieve_dto() -> CreateUserDto:
-            with open(Paths.ADMIN_USER_JSON_FILE, encoding="utf-8") as file:
-                return json.load(file)
-
-        dto = retrieve_dto()
-        dto["email"] = Environs.ADMIN_EMAIL
-        dto["password"] = Environs.ADMIN_PASSWORD
-        with app.app_context():
-            user = User.find_first_by_id(1)
-            if user:
-                return
-            
-            UserService.create(dto)

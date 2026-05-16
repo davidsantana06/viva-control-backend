@@ -35,7 +35,7 @@ class ProductDto(TypedDict):
 
 class UserDto(TypedDict):
     id: int
-    parent_id: NotRequired[int]
+    distributor_id: NotRequired[int]
     name: str
     email: str
     role: UserRole

@@ -10,7 +10,7 @@ user_model = user_ns.model(
     "User",
     UserDto(
         id=Integer(readonly=True),
-        parent_id=Integer(),
+        distributor_id=Integer(),
         name=String(),
         email=String(),
         role=String(enum=list(UserRole)),
@@ -21,7 +21,7 @@ user_model = user_ns.model(
 create_user_model = user_ns.model(
     "CreateUser",
     CreateUserDto(
-        parent_id=Integer(),
+        distributor_id=Integer(),
         name=String(required=True, min_length=2, max_length=50),
         email=String(required=True, min_length=5, max_length=255),
         password=String(required=True, min_length=8, max_length=40),
