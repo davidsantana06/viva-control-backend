@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.decorators import (
     create_resource,
-    deactivate_resource,
+    delete_resource,
     get_resource,
     list_resource,
     role_required,
@@ -67,7 +67,7 @@ class PaymentMethod(Resource):
         """Update a payment method by ID"""
         return PaymentMethodService.update(id, payment_method_ns.payload)
 
-    @deactivate_resource(payment_method_ns, PaymentMethodNotFound)
+    @delete_resource(payment_method_ns, PaymentMethodNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a payment method by ID"""

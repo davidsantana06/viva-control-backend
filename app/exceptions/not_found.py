@@ -6,6 +6,10 @@ class CustomerNotFound(ApiException, NotFound):
     description = "Customer not found"
 
 
+class DistributorStockNotFound(ApiException, NotFound):
+    description = "Distributor stock not found"
+
+
 class PaymentMethodNotFound(ApiException, NotFound):
     description = "Payment method not found"
 

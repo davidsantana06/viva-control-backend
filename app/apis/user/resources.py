@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.decorators import (
     create_resource,
-    deactivate_resource,
+    delete_resource,
     get_resource,
     list_resource,
     role_required,
@@ -65,7 +65,7 @@ class User(Resource):
         current_user = ApiUtils.resolve_current_user()
         return UserService.update(id, user_ns.payload, current_user)
 
-    @deactivate_resource(user_ns, UserNotFound)
+    @delete_resource(user_ns, UserNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a user by ID"""

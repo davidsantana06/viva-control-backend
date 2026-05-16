@@ -9,7 +9,7 @@ from sqlalchemy.orm import (
 from app.types import (
     CurrentUser,
     DistributorFilter,
-    DistributorOnlyFilter,
+    ScopedDistributorFilter,
     SellerFilter,
     UserFilter,
     UserRole,
@@ -45,11 +45,14 @@ class ModelUtils:
     def build_distributor_filter(
         current_user: CurrentUser,
         user_scoped: bool = False,
-    ) -> DistributorFilter | DistributorOnlyFilter:
-        user_filter = {"distributor_id": current_user.id}
-        if user_scoped:
-            user_filter["seller_id"] = None
-        return user_filter
+    ) -> DistributorFilter | ScopedDistributorFilter:
+        def build_unscoped_filter() -> DistributorFilter:
+            return DistributorFilter(distributor_id=current_user.id)
+
+        def build_scoped_filter() -> ScopedDistributorFilter:
+            return ScopedDistributorFilter(distributor_id=current_user.id, seller_id=None)
+
+        return build_unscoped_filter() if not user_scoped else build_scoped_filter()
 
     @staticmethod
     def __build_seller_filter(

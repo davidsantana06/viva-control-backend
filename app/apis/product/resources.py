@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from app.decorators import (
     create_resource,
-    deactivate_resource,
+    delete_resource,
     get_resource,
     list_resource,
     role_required,
@@ -62,7 +62,7 @@ class Product(Resource):
         """Update a product by ID"""
         return ProductService.update(id, product_ns.payload)
 
-    @deactivate_resource(product_ns, ProductNotFound)
+    @delete_resource(product_ns, ProductNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
         """Deactivate a product by ID"""

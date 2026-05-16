@@ -7,7 +7,8 @@ from app.types import FindAllParams
 class ProductService:
     @staticmethod
     def create(dto: CreateProductDto) -> Product:
-        if Product.find_first_by_sku(dto["sku"]):
+        other_product = Product.find_first_by_sku(dto["sku"])
+        if other_product:
             raise SkuAlreadyInUse()
 
         product = Product(**dto)
@@ -31,8 +32,9 @@ class ProductService:
     def update(cls, id: int, dto: UpdateProductDto) -> Product:
         product = cls.find_first(id)
 
-        sku_already_in_use = dto["sku"] != product.sku and Product.find_first_by_sku(dto["sku"])
-        if sku_already_in_use:
+        sku_is_different = dto["sku"] != product.sku
+        other_product = sku_is_different and Product.find_first_by_sku(dto["sku"])
+        if other_product:
             raise SkuAlreadyInUse()
 
         product.update(**dto)

@@ -6,7 +6,14 @@ from jwt.exceptions import PyJWTError
 from sqlalchemy.exc import OperationalError
 import json
 
-from app.apis import auth_ns, customer_ns, payment_method_ns, product_ns, user_ns
+from app.apis import (
+    auth_ns,
+    customer_ns,
+    distributor_stock_ns,
+    payment_method_ns,
+    product_ns,
+    user_ns,
+)
 from app.dtos import CreatePaymentMethodDto, CreateUserDto
 from app.extensions import api, cors, db, jwt, migrate
 from app.models import PaymentMethod, User
@@ -56,6 +63,7 @@ class Setup:
 
         api.add_namespace(auth_ns)
         api.add_namespace(customer_ns)
+        api.add_namespace(distributor_stock_ns)
         api.add_namespace(payment_method_ns)
         api.add_namespace(product_ns)
         api.add_namespace(user_ns)
@@ -103,7 +111,7 @@ class Setup:
         dto["email"] = Environs.ADMIN_EMAIL
         dto["password"] = Environs.ADMIN_PASSWORD
         with app.app_context():
-            try: 
+            try:
                 user = User.find_first_by_id(1)
                 if user:
                     return
@@ -117,13 +125,13 @@ class Setup:
         def retrieve_dtos() -> list[CreatePaymentMethodDto]:
             with open(
                 Paths.DEFAULT_PAYMENT_METHODS_JSON_FILE,
-                encoding="utf-8"
+                encoding="utf-8",
             ) as file:
                 return json.load(file)
-        
+
         dtos = retrieve_dtos()
         with app.app_context():
-            try: 
+            try:
                 payment_method = PaymentMethod.find_first_by_id(1)
                 if payment_method:
                     return

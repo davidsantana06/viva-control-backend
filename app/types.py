@@ -10,7 +10,7 @@ class DistributorFilter(TypedDict):
     distributor_id: int
 
 
-class DistributorOnlyFilter(TypedDict):
+class ScopedDistributorFilter(TypedDict):
     distributor_id: int
     seller_id: None
 
@@ -19,11 +19,11 @@ class SellerFilter(TypedDict):
     seller_id: int
 
 
-UserFilter = DistributorFilter | DistributorOnlyFilter | SellerFilter
+UserFilter = DistributorFilter | ScopedDistributorFilter | SellerFilter
 
 
 class JwtClaims(TypedDict):
-    distributor_id: int
+    distributor_id: int | None
     name: str
     role: "UserRole"
     is_admin: bool
@@ -62,11 +62,11 @@ class UserRole(StrEnum):
 # - - -
 
 
-# dataclass
+# dataclass_
 
 @dataclass(frozen=True)
 class CurrentUser:
-    id: int
+    id: int | None
     distributor_id: int
     name: str
     role: "UserRole"
@@ -91,7 +91,7 @@ class UserScopedFindAllParams(FindAllParams):
 # - - -
 
 
-# sqlalchemy
+# sqlalchemy_
 
 Filter = ColumnElement[bool]
 
