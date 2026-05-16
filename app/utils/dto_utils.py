@@ -15,7 +15,7 @@ class DtoUtils:
         dto["distributor_id"] = current_user.parent_id
 
     @classmethod
-    def inject_user_ids(
+    def inject_distributor_and_or_seller_ids(
         cls,
         dto: dict,
         current_user: CurrentUser,

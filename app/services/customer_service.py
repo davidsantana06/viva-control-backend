@@ -8,7 +8,7 @@ from app.utils import DtoUtils, ModelUtils
 class CustomerService:
     @staticmethod
     def create(dto: CreateCustomerDto, current_user: CurrentUser) -> Customer:
-        DtoUtils.inject_user_ids(dto, current_user)
+        DtoUtils.inject_distributor_and_or_seller_ids(dto, current_user)
         customer = Customer(**dto)
         Customer.save(customer)
         return customer
