@@ -7,10 +7,11 @@ from sqlalchemy.orm import (
 from typing import Self
 
 from app.extensions import db
-from app.models.mixin.lifecycle_mixin import LifecycleMixin
-from app.models.mixin.model_mixin import ModelMixin
 from app.types import FindAllParams, UserRole
 from app.utils import ModelUtils
+
+from .mixin.lifecycle_mixin import LifecycleMixin
+from .mixin.model_mixin import ModelMixin
 
 
 class User(db.Model, ModelMixin, LifecycleMixin):
@@ -21,6 +22,11 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     email: Mapped[str] = set_mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = set_mapped_column(CHAR(60))
     role: Mapped[str] = set_mapped_column(String(11))
+
+    parent: Mapped["User | None"] = set_relationship(
+        "User",
+        primaryjoin="foreign(User.parent_id) == User.id",
+    )
 
     @property
     def is_admin(self) -> bool:
@@ -33,11 +39,6 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     @property
     def is_seller(self) -> bool:
         return self.role == UserRole.SELLER
-
-    parent: Mapped["User | None"] = set_relationship(
-        "User",
-        primaryjoin="foreign(User.parent_id) == User.id",
-    )
 
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:

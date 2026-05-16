@@ -4,10 +4,11 @@ from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
 from app.extensions import db
-from app.models.mixin.lifecycle_mixin import LifecycleMixin
-from app.models.mixin.model_mixin import ModelMixin
 from app.types import FindAllParams, RoleFilter
 from app.utils import ModelUtils
+
+from .mixin.lifecycle_mixin import LifecycleMixin
+from .mixin.model_mixin import ModelMixin
 
 
 class Customer(db.Model, ModelMixin, LifecycleMixin):
