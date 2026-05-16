@@ -1,7 +1,7 @@
 from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import AdminDeactivationNotAllowed, EmailAlreadyInUse, UserNotFound
 from app.models import User
-from app.proxies import HashProxy
+from app.facades import Security
 from app.types import CurrentUser, FindAllParams
 from app.utils import ModelUtils
 
@@ -13,7 +13,7 @@ class UserService:
         if other_user:
             raise EmailAlreadyInUse()
 
-        dto["password_hash"] = HashProxy.hash(dto.pop("password"))
+        dto["password_hash"] = Security.hash_password(dto.pop("password"))
         user = User(**dto)
         User.save(user)
         return user
@@ -38,7 +38,7 @@ class UserService:
         user = cls.find_first(id)
 
         if dto.get("password"):
-            dto["password_hash"] = HashProxy.hash(dto.pop("password"))
+            dto["password_hash"] = Security.hash_password(dto.pop("password"))
 
         user.update(**dto)
         User.save(user)

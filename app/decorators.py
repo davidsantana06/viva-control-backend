@@ -6,7 +6,7 @@ from flask_restx.model import Model
 from flask_restx.reqparse import RequestParser
 
 from app.exceptions import ApiException, InvalidPayload, RoleNotAllowed
-from app.proxies import JwtProxy
+from app.facades import Security
 from app.types import CurrentUser, UserRole
 from app.utils import ApiUtils
 
@@ -15,14 +15,14 @@ def role_required(*roles: UserRole):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            JwtProxy.verify_or_raise()
-            claims = JwtProxy.get_claims()
+            Security.require_token()
+            claims = Security.get_token_claims()
 
             role_not_allowed = claims["role"] not in roles
             if role_not_allowed:
                 raise RoleNotAllowed()
 
-            current_user = CurrentUser(JwtProxy.get_identity(), **claims)
+            current_user = CurrentUser(Security.get_token_identity(), **claims)
             ApiUtils.bind_current_user(current_user)
             return func(*args, **kwargs)
 
