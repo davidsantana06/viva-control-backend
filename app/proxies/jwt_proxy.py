@@ -14,7 +14,13 @@ class JwtProxy:
     def issue(user: User) -> str:
         return create_access_token(
             identity=str(user.id),
-            additional_claims=JwtClaims(name=user.name, role=user.role),
+            additional_claims=JwtClaims(
+                name=user.name,
+                role=user.role,
+                is_admin=user.is_admin,
+                is_distributor=user.is_distributor,
+                is_seller=user.is_seller,
+            ),
         )
 
     @staticmethod

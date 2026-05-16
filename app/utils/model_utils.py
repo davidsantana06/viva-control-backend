@@ -36,8 +36,7 @@ class ModelUtils:
 
     @staticmethod
     def build_role_filter(current_user: CurrentUser) -> RoleFilter:
-        user_is_admin = current_user.role == UserRole.ADMIN
-        if user_is_admin:
+        if current_user.is_admin:
             return {}
 
         return {f"{current_user.role.lower()}_id": current_user.id}

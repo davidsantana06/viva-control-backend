@@ -1,5 +1,5 @@
 from flask_sqlalchemy.model import Model
-from sqlalchemy import ColumnElement, asc, desc, or_, true
+from sqlalchemy import ColumnElement, Table, asc, desc, or_, true
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Mapped
 from typing import Self
@@ -10,6 +10,8 @@ from app.utils import ModelUtils
 
 
 class ModelMixin(Model):
+    __table__: Table
+
     @declared_attr
     def id(cls) -> Mapped[int]:
         return ModelUtils.set_primary_key_column()

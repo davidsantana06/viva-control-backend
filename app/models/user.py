@@ -9,7 +9,7 @@ from typing import Self
 from app.extensions import db
 from app.models.mixin.lifecycle_mixin import LifecycleMixin
 from app.models.mixin.model_mixin import ModelMixin
-from app.types import FindAllParams
+from app.types import FindAllParams, UserRole
 from app.utils import ModelUtils
 
 
@@ -21,6 +21,18 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     email: Mapped[str] = set_mapped_column(String(255), unique=True)
     password_hash: Mapped[str] = set_mapped_column(CHAR(60))
     role: Mapped[str] = set_mapped_column(String(11))
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == UserRole.ADMIN
+    
+    @property
+    def is_distributor(self) -> bool:
+        return self.role == UserRole.DISTRIBUTOR
+    
+    @property
+    def is_seller(self) -> bool:
+        return self.role == UserRole.SELLER
 
     parent: Mapped["User | None"] = set_relationship(
         "User",

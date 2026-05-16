@@ -22,7 +22,7 @@ def role_required(*roles: UserRole):
             if role_not_allowed:
                 raise UserRoleNotAllowed()
 
-            current_user = CurrentUser(JwtProxy.get_identity(), claims["role"])
+            current_user = CurrentUser(JwtProxy.get_identity(), **claims)
             ApiUtils.bind_current_user(current_user)
             return func(*args, **kwargs)
 

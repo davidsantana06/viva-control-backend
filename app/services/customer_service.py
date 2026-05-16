@@ -8,11 +8,11 @@ from app.utils import ModelUtils
 class CustomerService:
     @staticmethod
     def create(dto: CreateCustomerDto, current_user: CurrentUser) -> Customer:
-        if current_user.role == UserRole.SELLER:
+        if current_user.is_seller:
             seller = User.find_first_by_id(current_user.id)
             dto["seller_id"] = current_user.id
             dto["distributor_id"] = seller.parent_id
-        elif current_user.role == UserRole.DISTRIBUTOR:
+        elif current_user.is_distributor:
             dto["distributor_id"] = current_user.id
 
         customer = Customer(**dto)

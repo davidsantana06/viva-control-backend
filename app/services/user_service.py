@@ -44,8 +44,7 @@ class UserService:
     def deactivate(cls, id: int) -> None:
         user = cls.find_first(id)
 
-        user_is_admin = user.role == UserRole.ADMIN
-        if user_is_admin:
+        if user.is_admin:
             raise UserAdminDeactivationNotAllowed()
 
         User.deactivate(user)

@@ -14,6 +14,9 @@ class RoleFilter(TypedDict):
 class JwtClaims(TypedDict):
     name: str
     role: "UserRole"
+    is_admin: bool
+    is_distributor: bool
+    is_seller: bool
 
 # - - -
 
@@ -52,7 +55,11 @@ class UserRole(StrEnum):
 @dataclass(frozen=True)
 class CurrentUser:
     id: int
+    name: str
     role: "UserRole"
+    is_admin: bool
+    is_distributor: bool
+    is_seller: bool
 
 
 @dataclass(frozen=True)
