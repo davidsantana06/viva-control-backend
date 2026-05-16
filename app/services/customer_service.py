@@ -1,7 +1,7 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
 from app.exceptions import CustomerNotFound
 from app.models import Customer
-from app.types import CurrentUser, FindAllParams
+from app.types import CurrentUser, UserScopedFindAllParams
 from app.utils import DtoUtils, ModelUtils
 
 
@@ -14,8 +14,11 @@ class CustomerService:
         return customer
 
     @staticmethod
-    def find_all(params: FindAllParams, current_user: CurrentUser) -> list[Customer]:
-        user_filter = ModelUtils.build_user_filter(current_user)
+    def find_all(
+        params: UserScopedFindAllParams,
+        current_user: CurrentUser,
+    ) -> list[Customer]:
+        user_filter = ModelUtils.build_user_filter(current_user, params.user_scoped)
         return Customer.find_all(params, user_filter)
 
     @staticmethod

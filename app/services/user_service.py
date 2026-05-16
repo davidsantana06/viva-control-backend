@@ -20,13 +20,13 @@ class UserService:
 
     @staticmethod
     def find_all(params: FindAllParams, current_user: CurrentUser) -> list[User]:
-        distributor_filter = ModelUtils.build_distributor_filter(current_user)
-        return User.find_all(params, distributor_filter)
+        user_filter = ModelUtils.build_distributor_filter(current_user)
+        return User.find_all(params, user_filter)
 
     @staticmethod
     def find_first(id: int, current_user: CurrentUser) -> User:
-        distributor_filter = ModelUtils.build_distributor_filter(current_user)
-        user = User.find_first_by_id(id, distributor_filter)
+        user_filter = ModelUtils.build_distributor_filter(current_user)
+        user = User.find_first_by_id(id, user_filter)
 
         if not user:
             raise UserNotFound()

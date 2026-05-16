@@ -44,11 +44,11 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     def find_first_by_id(
         cls,
         id: int,
-        distributor_filter: DistributorFilter = {}
+        user_filter: DistributorFilter = {}
     ) -> Self | None:
         return (
             cls.query
-            .filter_by(**distributor_filter)
+            .filter_by(**user_filter)
             .filter(cls.id == id, cls.is_active.is_(True))
             .first()
         )
@@ -61,11 +61,11 @@ class User(db.Model, ModelMixin, LifecycleMixin):
     def find_all(
         cls,
         params: FindAllParams,
-        distributor_filter: DistributorFilter = {}
+        user_filter: DistributorFilter = {}
     ) -> list[Self]:
         return (
             cls.query
-            .filter_by(**distributor_filter)
+            .filter_by(**user_filter)
             .filter(
                 cls._mount_q_filter(params.q, cls.name, cls.email),
                 cls.is_active.is_(True)

@@ -11,7 +11,7 @@ class Environs:
 
     JSON_SORT_KEYS = False
 
-    JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY", "VIVA_CONTROL__by__davidsantana06")
+    JWT_SECRET_KEY = environ.get("JWT_SECRET_KEY", "SUPER-SECURE-JWT-SECRET-KEY")
 
     SQLALCHEMY_DATABASE_URI = environ.get(
         "DATABASE_URI",

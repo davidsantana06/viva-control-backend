@@ -1,9 +1,10 @@
 from flask import g
 from flask_restx import Namespace
+from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from typing import get_args
 
-from app.types import CurrentUser, FindAllParams, SortOrder
+from app.types import CurrentUser, FindAllParams, SortOrder, UserScopedFindAllParams
 
 
 class ApiUtils:
@@ -51,10 +52,23 @@ class ApiUtils:
     @staticmethod
     def build_find_all_params(request_parser: RequestParser) -> FindAllParams:
         args = request_parser.parse_args()
-        return FindAllParams(
-            q=args.q,
-            sort=args.sort,
-            order=args.order,
-            page=args.page,
-            per_page=args.per_page,
+        return FindAllParams(**args)
+
+    @classmethod
+    def build_user_scoped_find_all_parser(cls, ns: Namespace) -> RequestParser:
+        parser = cls.build_find_all_parser(ns)
+        parser.add_argument(
+            "user_scoped",
+            location="args",
+            type=boolean,
+            default=False,
+            help="Restrict results to records created by the current user only",
         )
+        return parser
+
+    @staticmethod
+    def build_user_scoped_find_all_params(
+        request_parser: RequestParser,
+    ) -> UserScopedFindAllParams:
+        args = request_parser.parse_args()
+        return UserScopedFindAllParams(**args)

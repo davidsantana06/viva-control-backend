@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import StrEnum
 from sqlalchemy import ColumnElement, UnaryExpression
-from typing import Literal, TypedDict, Union
+from typing import Literal, TypedDict
 
 
 # dict_
@@ -10,11 +10,16 @@ class DistributorFilter(TypedDict):
     distributor_id: int
 
 
+class DistributorOnlyFilter(TypedDict):
+    distributor_id: int
+    seller_id: None
+
+
 class SellerFilter(TypedDict):
     seller_id: int
 
 
-UserFilter = Union[DistributorFilter, SellerFilter]
+UserFilter = DistributorFilter | DistributorOnlyFilter | SellerFilter
 
 
 class JwtClaims(TypedDict):
@@ -77,6 +82,11 @@ class FindAllParams:
     sort: str
     page: int
     per_page: int
+
+
+@dataclass(frozen=True)
+class UserScopedFindAllParams(FindAllParams):
+    user_scoped: bool = False
 
 # - - -
 
