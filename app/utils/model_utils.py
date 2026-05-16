@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
     relationship as set_relationship,
 )
 
-from app.types import CurrentUser, RoleFilter
+from app.types import CurrentUser, ParentFilter, RoleFilter
 
 
 class ModelUtils:
@@ -34,9 +34,18 @@ class ModelUtils:
     def set_parent_relationship(back_populates: str) -> Relationship:
         return set_relationship(back_populates=back_populates)
 
-    @staticmethod
-    def build_role_filter(current_user: CurrentUser) -> RoleFilter:
-        if current_user.is_admin:
+    @classmethod
+    def build_parent_filter(cls, current_user: CurrentUser) -> ParentFilter:
+        if not current_user.is_distributor:
             return {}
 
-        return {f"{current_user.role.lower()}_id": current_user.id}
+        return {"parent_id": current_user.id}
+
+    @classmethod
+    def build_role_filter(cls, current_user: CurrentUser) -> RoleFilter:
+        can_filter = current_user.is_distributor or current_user.is_seller
+        if not can_filter:
+            return {}
+
+        column = f"{current_user.role.lower()}_id"
+        return {column: current_user.id}

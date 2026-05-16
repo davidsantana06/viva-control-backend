@@ -2,7 +2,8 @@ from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import AdminDeactivationNotAllowed, EmailAlreadyInUse, UserNotFound
 from app.models import User
 from app.proxies import HashProxy
-from app.types import FindAllParams
+from app.types import CurrentUser, FindAllParams
+from app.utils import ModelUtils
 
 
 class UserService:
@@ -18,12 +19,14 @@ class UserService:
         return user
 
     @staticmethod
-    def find_all(params: FindAllParams) -> list[User]:
-        return User.find_all(params)
+    def find_all(params: FindAllParams, current_user: CurrentUser) -> list[User]:
+        parent_filter = ModelUtils.build_parent_filter(current_user)
+        return User.find_all(params, parent_filter)
 
     @staticmethod
-    def find_first(id: int) -> User:
-        user = User.find_first_by_id(id)
+    def find_first(id: int, current_user: CurrentUser) -> User:
+        parent_filter = ModelUtils.build_parent_filter(current_user)
+        user = User.find_first_by_id(id, parent_filter)
 
         if not user:
             raise UserNotFound()

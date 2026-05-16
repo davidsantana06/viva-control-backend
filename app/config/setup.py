@@ -95,7 +95,10 @@ class Setup:
     @staticmethod
     def create_default_payment_methods_if_absent(app: Flask) -> None:
         def retrieve_dtos() -> list[CreatePaymentMethodDto]:
-            with open(Paths.DEFAULT_PAYMENT_METHODS_JSON_FILE, encoding="utf-8") as file:
+            with open(
+                Paths.DEFAULT_PAYMENT_METHODS_JSON_FILE,
+                encoding="utf-8"
+            ) as file:
                 return json.load(file)
         
         dtos = retrieve_dtos()

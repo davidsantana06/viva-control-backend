@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
 from typing import Self
 
 from app.extensions import db
-from app.types import FindAllParams, UserRole
+from app.types import FindAllParams, ParentFilter, UserRole
 from app.utils import ModelUtils
 
 from .mixin.lifecycle_mixin import LifecycleMixin
@@ -41,17 +41,23 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         return self.role == UserRole.SELLER
 
     @classmethod
-    def find_first_by_id(cls, id: int) -> Self | None:
-        return cls.query.filter(cls.id == id, cls.is_active.is_(True)).first()
+    def find_first_by_id(cls, id: int, parent_filter: ParentFilter = {}) -> Self | None:
+        return (
+            cls.query
+            .filter_by(**parent_filter)
+            .filter(cls.id == id, cls.is_active.is_(True))
+            .first()
+        )
 
     @classmethod
     def find_first_by_email(cls, email: str) -> Self | None:
         return cls.query.filter(cls.email == email).first()
 
     @classmethod
-    def find_all(cls, params: FindAllParams) -> list[Self]:
+    def find_all(cls, params: FindAllParams, parent_filter: ParentFilter) -> list[Self]:
         return (
             cls.query
+            .filter_by(**parent_filter)
             .filter(
                 cls._mount_q_filter(params.q, cls.name, cls.email),
                 cls.is_active.is_(True)

@@ -32,6 +32,7 @@ Desenvolvido em **Python 3.12**, recomenda-se o uso dessa versão para garantir 
 
 ```bash
 # Windows
+python -m venv .venv
 
 # Linux / macOS
 python3 -m venv .venv

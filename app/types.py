@@ -6,6 +6,10 @@ from typing import Literal, NotRequired, TypedDict
 
 # dict_
 
+class ParentFilter(TypedDict):
+    parent_id: int
+
+
 class RoleFilter(TypedDict):
     distributor_id: NotRequired[int]
     seller_id: NotRequired[int]

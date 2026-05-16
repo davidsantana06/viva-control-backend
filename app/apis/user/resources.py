@@ -37,8 +37,9 @@ class UserList(Resource):
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self):
         """Get all users"""
+        current_user = ApiUtils.resolve_current_user()
         find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
-        return UserService.find_all(find_all_params)
+        return UserService.find_all(find_all_params, current_user)
 
 
 @user_ns.route("/<int:id>")
@@ -48,7 +49,8 @@ class User(Resource):
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self, id: int):
         """Get a user by ID"""
-        return UserService.find_first(id)
+        current_user = ApiUtils.resolve_current_user()
+        return UserService.find_first(id, current_user)
 
     @update_resource(
         user_ns,
