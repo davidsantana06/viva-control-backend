@@ -1,11 +1,31 @@
 from typing import NotRequired, TypedDict
 
-from app.types import UserRole
+from app.types import DocumentType, UserRole
 
 
 class LoginDto(TypedDict):
     email: str
     password: str
+
+
+class CreateCustomerDto(TypedDict):
+    distributor_id: NotRequired[int]
+    seller_id: NotRequired[int]
+    name: str
+    document: str
+    document_type: DocumentType
+    phone: NotRequired[str]
+    address: NotRequired[str]
+    birth_date: NotRequired[str]
+    notes: NotRequired[str]
+
+
+class UpdateCustomerDto(TypedDict):
+    name: NotRequired[str]
+    phone: NotRequired[str]
+    address: NotRequired[str]
+    birth_date: NotRequired[str]
+    notes: NotRequired[str]
 
 
 class CreatePaymentMethodDto(TypedDict):
@@ -40,7 +60,7 @@ class CreateUserDto(TypedDict):
 
 
 class UpdateUserDto(TypedDict):
-    name: str
-    email: str
+    name: NotRequired[str]
+    email: NotRequired[str]
     password: NotRequired[str]
     password_hash: NotRequired[str]

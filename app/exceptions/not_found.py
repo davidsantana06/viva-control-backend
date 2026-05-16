@@ -2,6 +2,10 @@ from werkzeug.exceptions import NotFound
 from .base.api_exception import ApiException
 
 
+class CustomerNotFound(ApiException, NotFound):
+    description = "Customer not found"
+
+
 class PaymentMethodNotFound(ApiException, NotFound):
     description = "Payment method not found"
 

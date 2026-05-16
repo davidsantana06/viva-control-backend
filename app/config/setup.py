@@ -5,7 +5,7 @@ from http import HTTPStatus
 from jwt.exceptions import PyJWTError
 import json
 
-from app.apis import auth_ns, payment_method_ns, product_ns, user_ns
+from app.apis import auth_ns, customer_ns, payment_method_ns, product_ns, user_ns
 from app.dtos import CreatePaymentMethodDto, CreateUserDto
 from app.extensions import api, cors, db, jwt, migrate
 from app.models import PaymentMethod, User
@@ -54,6 +54,7 @@ class Setup:
         )
 
         api.add_namespace(auth_ns)
+        api.add_namespace(customer_ns)
         api.add_namespace(payment_method_ns)
         api.add_namespace(product_ns)
         api.add_namespace(user_ns)

@@ -34,6 +34,11 @@ ExceptionSpecs = tuple[str, int]
 
 # enum_
 
+class DocumentType(StrEnum):
+    CPF = "CPF"
+    CNPJ = "CNPJ"
+
+
 class UserRole(StrEnum):
     ADMIN = "ADMIN"
     DISTRIBUTOR = "DISTRIBUTOR"
