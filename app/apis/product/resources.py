@@ -9,7 +9,7 @@ from app.decorators import (
     role_required,
     update_resource,
 )
-from app.exceptions import ProductNotFound, ProductSkuAlreadyInUse
+from app.exceptions import ProductNotFound, SkuAlreadyInUse
 from app.services import ProductService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -26,7 +26,7 @@ class ProductList(Resource):
         product_ns,
         create_product_model,
         product_model,
-        ProductSkuAlreadyInUse,
+        SkuAlreadyInUse,
     )
     @role_required(UserRole.ADMIN)
     def post(self):
@@ -55,7 +55,7 @@ class Product(Resource):
         update_product_model,
         product_model,
         ProductNotFound,
-        ProductSkuAlreadyInUse,
+        SkuAlreadyInUse,
     )
     @role_required(UserRole.ADMIN)
     def patch(self, id: int):

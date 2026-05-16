@@ -9,7 +9,7 @@ from app.decorators import (
     role_required,
     update_resource,
 )
-from app.exceptions import UserEmailAlreadyInUse, UserNotFound
+from app.exceptions import EmailAlreadyInUse, UserNotFound
 from app.services import UserService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -26,7 +26,7 @@ class UserList(Resource):
         user_ns,
         create_user_model,
         user_model,
-        UserEmailAlreadyInUse,
+        EmailAlreadyInUse,
     )
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def post(self):
@@ -55,7 +55,7 @@ class User(Resource):
         update_user_model,
         user_model,
         UserNotFound,
-        UserEmailAlreadyInUse,
+        EmailAlreadyInUse,
     )
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def patch(self, id: int):

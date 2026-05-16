@@ -5,7 +5,7 @@ from flask_restx import Namespace
 from flask_restx.model import Model
 from flask_restx.reqparse import RequestParser
 
-from app.exceptions import ApiException, InvalidPayload, UserRoleNotAllowed
+from app.exceptions import ApiException, InvalidPayload, RoleNotAllowed
 from app.proxies import JwtProxy
 from app.types import CurrentUser, UserRole
 from app.utils import ApiUtils
@@ -20,7 +20,7 @@ def role_required(*roles: UserRole):
 
             role_not_allowed = claims["role"] not in roles
             if role_not_allowed:
-                raise UserRoleNotAllowed()
+                raise RoleNotAllowed()
 
             current_user = CurrentUser(JwtProxy.get_identity(), **claims)
             ApiUtils.bind_current_user(current_user)

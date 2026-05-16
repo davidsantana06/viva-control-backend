@@ -1,5 +1,5 @@
 from app.dtos import CreateUserDto, UpdateUserDto
-from app.exceptions import UserAdminDeactivationNotAllowed, UserEmailAlreadyInUse, UserNotFound
+from app.exceptions import AdminDeactivationNotAllowed, EmailAlreadyInUse, UserNotFound
 from app.models import User
 from app.proxies import HashProxy
 from app.types import FindAllParams, UserRole
@@ -9,7 +9,7 @@ class UserService:
     @staticmethod
     def create(dto: CreateUserDto) -> User:
         if User.find_first_by_email(dto["email"]):
-            raise UserEmailAlreadyInUse()
+            raise EmailAlreadyInUse()
 
         dto["password_hash"] = HashProxy.hash(dto.pop("password"))
         user = User(**dto)
@@ -45,7 +45,7 @@ class UserService:
         user = cls.find_first(id)
 
         if user.is_admin:
-            raise UserAdminDeactivationNotAllowed()
+            raise AdminDeactivationNotAllowed()
 
         User.deactivate(user)
         User.save(user)
