@@ -1,7 +1,8 @@
 from app.dtos import CreateDistributorStockDto, UpdateDistributorStockDto
 from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
 from app.models import DistributorStock
-from app.types import CurrentUser, DistributorFilter, FindAllParams, UserRole
+from app.types import CurrentUser, FindAllParams
+from app.utils import ModelUtils
 
 
 class DistributorStockService:
@@ -30,17 +31,17 @@ class DistributorStockService:
         params: FindAllParams,
         current_user: CurrentUser,
     ) -> list[DistributorStock]:
-        user_filter = cls.__build_local_distributor_filter(current_user)
+        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all(params, user_filter)
 
     @classmethod
     def find_all_below_minimum(cls, current_user: CurrentUser) -> list[DistributorStock]:
-        user_filter = cls.__build_local_distributor_filter(current_user)
+        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all_below_minimum(user_filter)
 
     @classmethod
     def find_first(cls, id: int, current_user: CurrentUser) -> DistributorStock:
-        user_filter = cls.__build_local_distributor_filter(current_user)
+        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
         stock = DistributorStock.find_first_by_id(id, user_filter)
 
         if not stock:
@@ -64,17 +65,3 @@ class DistributorStockService:
     def delete(cls, id: int, current_user: CurrentUser) -> None:
         stock = cls.find_first(id, current_user)
         DistributorStock.delete(stock)
-
-    @staticmethod
-    def __build_local_distributor_filter(
-        current_user: CurrentUser,
-    ) -> DistributorFilter:
-        can_build = current_user.role in (UserRole.DISTRIBUTOR, UserRole.SELLER)
-        if not can_build:
-            return {}
-
-        distributor_id = (
-            current_user.id if current_user.is_distributor
-            else current_user.distributor_id
-        )
-        return DistributorFilter(distributor_id=distributor_id)
