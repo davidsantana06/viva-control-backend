@@ -61,7 +61,7 @@ class DistributorStock(db.Model, ModelMixin, TimestampMixin):
         )
 
     @classmethod
-    def find_low_stock(cls, user_filter: DistributorFilter) -> list[Self]:
+    def find_all_below_minimum(cls, user_filter: DistributorFilter) -> list[Self]:
         return (
             cls.query
             .filter_by(**user_filter)

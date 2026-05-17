@@ -34,9 +34,9 @@ class DistributorStockService:
         return DistributorStock.find_all(params, user_filter)
 
     @classmethod
-    def find_low_stock(cls, current_user: CurrentUser) -> list[DistributorStock]:
+    def find_all_below_minimum(cls, current_user: CurrentUser) -> list[DistributorStock]:
         user_filter = cls.__build_local_distributor_filter(current_user)
-        return DistributorStock.find_low_stock(user_filter)
+        return DistributorStock.find_all_below_minimum(user_filter)
 
     @classmethod
     def find_first(cls, id: int, current_user: CurrentUser) -> DistributorStock:

@@ -50,15 +50,15 @@ class DistributorStockList(Resource):
         return DistributorStockService.find_all(find_all_params, current_user)
 
 
-@distributor_stock_ns.route("/low-stock")
-class DistributorStockLowStock(Resource):
-    @distributor_stock_ns.doc("list_low_stock_distributor_stock", security="Bearer")
+@distributor_stock_ns.route("/below-minimum")
+class DistributorStockBelowMinimum(Resource):
+    @distributor_stock_ns.doc("list_below_minimum", security="Bearer")
     @distributor_stock_ns.marshal_list_with(distributor_stock_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self):
         """Get stock entries at or below minimum quantity"""
         current_user = ApiUtils.resolve_current_user()
-        return DistributorStockService.find_low_stock(current_user)
+        return DistributorStockService.find_all_below_minimum(current_user)
 
 
 @distributor_stock_ns.route("/<int:id>")
