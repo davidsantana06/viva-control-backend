@@ -1,8 +1,9 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
 from app.exceptions import CustomerNotFound
+from app.factories import UserFilterFactory
 from app.models import Customer
 from app.types import CurrentUser, UserScopedFindAllParams
-from app.utils import DtoUtils, ModelUtils
+from app.utils import DtoUtils
 
 
 class CustomerService:
@@ -18,12 +19,15 @@ class CustomerService:
         params: UserScopedFindAllParams,
         current_user: CurrentUser,
     ) -> list[Customer]:
-        user_filter = ModelUtils.build_user_filter(current_user, params.user_scoped)
+        user_filter = UserFilterFactory.build_user_filter(
+            current_user,
+            params.user_scoped,
+        )
         return Customer.find_all(params, user_filter)
 
     @staticmethod
     def find_first(id: int, current_user: CurrentUser) -> Customer:
-        user_filter = ModelUtils.build_user_filter(current_user)
+        user_filter = UserFilterFactory.build_user_filter(current_user)
         customer = Customer.find_first_by_id(id, user_filter)
 
         if not customer:

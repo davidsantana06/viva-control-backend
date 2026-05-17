@@ -1,8 +1,8 @@
 from app.dtos import CreateDistributorStockDto, UpdateDistributorStockDto
 from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
+from app.factories import UserFilterFactory
 from app.models import DistributorStock
 from app.types import CurrentUser, FindAllParams
-from app.utils import ModelUtils
 
 
 class DistributorStockService:
@@ -31,17 +31,20 @@ class DistributorStockService:
         params: FindAllParams,
         current_user: CurrentUser,
     ) -> list[DistributorStock]:
-        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
+        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all(params, user_filter)
 
     @classmethod
-    def find_all_below_minimum(cls, current_user: CurrentUser) -> list[DistributorStock]:
-        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
+    def find_all_below_minimum(
+        cls,
+        current_user: CurrentUser,
+    ) -> list[DistributorStock]:
+        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all_below_minimum(user_filter)
 
     @classmethod
     def find_first(cls, id: int, current_user: CurrentUser) -> DistributorStock:
-        user_filter = ModelUtils.build_strict_distributor_filter(current_user)
+        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
         stock = DistributorStock.find_first_by_id(id, user_filter)
 
         if not stock:
