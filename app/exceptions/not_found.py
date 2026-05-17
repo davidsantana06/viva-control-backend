@@ -18,5 +18,9 @@ class ProductNotFound(ApiException, NotFound):
     description = "Product not found"
 
 
+class OrderNotFound(ApiException, NotFound):
+    description = "Order not found"
+
+
 class UserNotFound(ApiException, NotFound):
     description = "User not found"

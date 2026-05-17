@@ -61,6 +61,35 @@ class ProductDto(TypedDict):
 # - - -
 
 
+# order/order_item_
+
+class OrderItemDto(TypedDict):
+    id: int
+    order_id: int
+    product_id: int
+    quantity: float
+    unit_price: float
+    total_price: float
+
+
+class OrderDto(TypedDict):
+    id: int
+    customer_id: int
+    distributor_id: int
+    seller_id: NotRequired[int]
+    payment_method_id: NotRequired[int]
+    total_amount: float
+    discount_pct: float
+    net_amount: float
+    payment_installments: int
+    payment_due_date: str
+    notes: NotRequired[str]
+    status: str
+    items: list[OrderItemDto]
+
+# - - -
+
+
 # user_
 
 class UserDto(TypedDict):

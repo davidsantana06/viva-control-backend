@@ -54,6 +54,13 @@ class DocumentType(StrEnum):
     CNPJ = "CNPJ"
 
 
+class OrderStatus(StrEnum):
+    PENDING = "PENDING"
+    CANCELLED = "CANCELLED"
+    DELIVERED_UNPAID = "DELIVERED_UNPAID"
+    DELIVERED_PAID = "DELIVERED_PAID"
+
+
 class UserRole(StrEnum):
     ADMIN = "ADMIN"
     DISTRIBUTOR = "DISTRIBUTOR"

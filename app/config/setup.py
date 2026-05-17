@@ -10,6 +10,7 @@ from app.apis import (
     auth_ns,
     customer_ns,
     distributor_stock_ns,
+    order_ns,
     payment_method_ns,
     product_ns,
     user_ns,
@@ -64,6 +65,7 @@ class Setup:
         api.add_namespace(auth_ns)
         api.add_namespace(customer_ns)
         api.add_namespace(distributor_stock_ns)
+        api.add_namespace(order_ns)
         api.add_namespace(payment_method_ns)
         api.add_namespace(product_ns)
         api.add_namespace(user_ns)

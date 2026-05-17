@@ -1,6 +1,6 @@
 from typing import NotRequired, TypedDict
 
-from app.types import DocumentType, UserRole
+from app.types import DocumentType, OrderStatus, UserRole
 
 
 # auth_
@@ -78,6 +78,30 @@ class UpdateProductDto(TypedDict):
     sku: NotRequired[str]
     description: NotRequired[str]
     suggested_price: NotRequired[float]
+
+# - - -
+
+
+# order/ordem_item_
+
+class CreateOrderItemDto(TypedDict):
+    product_id: int
+    quantity: float
+    unit_price: NotRequired[float]
+
+
+class CreateOrderDto(TypedDict):
+    customer_id: int
+    payment_method_id: NotRequired[int]
+    discount_pct: float
+    payment_installments: int
+    payment_due_date: str
+    notes: NotRequired[str]
+    items: list
+
+
+class UpdateOrderStatusDto(TypedDict):
+    status: OrderStatus
 
 # - - -
 
