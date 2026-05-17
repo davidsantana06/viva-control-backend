@@ -10,9 +10,9 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import ProductNotFound, SkuAlreadyInUse
+from app.factories import FindAllFactory
 from app.services import ProductService
 from app.types import UserRole
-from app.utils import ApiUtils
 
 from . import product_ns
 from .models import create_product_model, product_model, update_product_model
@@ -20,7 +20,7 @@ from .models import create_product_model, product_model, update_product_model
 
 @product_ns.route("/")
 class ProductList(Resource):
-    __find_all_parser = ApiUtils.build_find_all_parser(product_ns)
+    __find_all_parser = FindAllFactory.build_find_all_parser(product_ns)
 
     @create_resource(
         product_ns,
@@ -37,7 +37,7 @@ class ProductList(Resource):
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self):
         """Get all products"""
-        find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
+        find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return ProductService.find_all(find_all_params)
 
 

@@ -10,6 +10,7 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import EmailAlreadyInUse, UserNotFound
+from app.factories import FindAllFactory
 from app.services import UserService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -20,7 +21,7 @@ from .models import create_user_model, update_user_model, user_model
 
 @user_ns.route("/")
 class UserList(Resource):
-    __find_all_parser = ApiUtils.build_find_all_parser(user_ns)
+    __find_all_parser = FindAllFactory.build_find_all_parser(user_ns)
 
     @create_resource(
         user_ns,
@@ -38,7 +39,7 @@ class UserList(Resource):
     def get(self):
         """Get all users"""
         current_user = ApiUtils.resolve_current_user()
-        find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
+        find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return UserService.find_all(find_all_params, current_user)
 
 

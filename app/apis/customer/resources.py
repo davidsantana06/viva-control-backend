@@ -10,6 +10,7 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import CustomerNotFound
+from app.factories import FindAllFactory
 from app.services import CustomerService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -20,7 +21,7 @@ from .models import create_customer_model, customer_model, update_customer_model
 
 @customer_ns.route("/")
 class CustomerList(Resource):
-    __find_all_parser = ApiUtils.build_user_scoped_find_all_parser(customer_ns)
+    __find_all_parser = FindAllFactory.build_user_scoped_find_all_parser(customer_ns)
 
     @create_resource(customer_ns, create_customer_model, customer_model)
     @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
@@ -37,7 +38,7 @@ class CustomerList(Resource):
     def get(self):
         """Get all customers"""
         current_user = ApiUtils.resolve_current_user()
-        find_all_params = ApiUtils.build_user_scoped_find_all_params(
+        find_all_params = FindAllFactory.build_user_scoped_find_all_params(
             self.__find_all_parser,
         )
         return CustomerService.find_all(find_all_params, current_user)

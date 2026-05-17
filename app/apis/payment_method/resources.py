@@ -10,9 +10,9 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import PaymentMethodNotFound
+from app.factories import FindAllFactory
 from app.services import PaymentMethodService
 from app.types import UserRole
-from app.utils import ApiUtils
 
 from . import payment_method_ns
 from .models import (
@@ -24,7 +24,7 @@ from .models import (
 
 @payment_method_ns.route("/")
 class PaymentMethodList(Resource):
-    __find_all_parser = ApiUtils.build_find_all_parser(payment_method_ns)
+    __find_all_parser = FindAllFactory.build_find_all_parser(payment_method_ns)
 
     @create_resource(
         payment_method_ns,
@@ -43,7 +43,7 @@ class PaymentMethodList(Resource):
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self):
         """Get all payment methods"""
-        find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
+        find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return PaymentMethodService.find_all(find_all_params)
 
 

@@ -10,6 +10,7 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
+from app.factories import FindAllFactory
 from app.services import DistributorStockService
 from app.types import UserRole
 from app.utils import ApiUtils
@@ -24,7 +25,7 @@ from .models import (
 
 @distributor_stock_ns.route("/")
 class DistributorStockList(Resource):
-    __find_all_parser = ApiUtils.build_find_all_parser(distributor_stock_ns)
+    __find_all_parser = FindAllFactory.build_find_all_parser(distributor_stock_ns)
 
     @create_resource(
         distributor_stock_ns,
@@ -46,7 +47,7 @@ class DistributorStockList(Resource):
     def get(self):
         """Get all stock entries"""
         current_user = ApiUtils.resolve_current_user()
-        find_all_params = ApiUtils.build_find_all_params(self.__find_all_parser)
+        find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return DistributorStockService.find_all(find_all_params, current_user)
 
 
