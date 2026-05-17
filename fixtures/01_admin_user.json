@@ -1,6 +1,6 @@
 {
-    "name": "Administrador",
-    "email": "$ADMIN_EMAIL",
-    "password": "$ADMIN_PASSWORD",
-    "role": "ADMIN"
+  "name": "Administrador",
+  "email": "$ADMIN_EMAIL",
+  "password": "$ADMIN_PASSWORD",
+  "role": "ADMIN"
 }

@@ -1,8 +1,8 @@
 [
-    {"name": "Dinheiro"},
-    {"name": "PIX"},
-    {"name": "Boleto"},
-    {"name": "Cartão de Crédito"},
-    {"name": "Cartão de Débito"},
-    {"name": "Transferência Bancária"}
+  { "name": "Dinheiro" },
+  { "name": "PIX" },
+  { "name": "Boleto" },
+  { "name": "Cartão de Crédito" },
+  { "name": "Cartão de Débito" },
+  { "name": "Transferência Bancária" }
 ]
