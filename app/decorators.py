@@ -7,7 +7,6 @@ from flask_restx.reqparse import RequestParser
 
 from app.exceptions import ApiException, InvalidPayload, RoleNotAllowed
 from app.facades import Security
-from app.models import User
 from app.types import CurrentUser, UserRole
 from app.utils import ApiUtils
 
@@ -23,7 +22,15 @@ def role_required(*roles: UserRole):
             if role_not_allowed:
                 raise RoleNotAllowed()
 
-            current_user = CurrentUser(Security.get_token_identity(), **claims)
+            current_user = CurrentUser(
+                id=Security.get_token_identity(),
+                distributor_id=claims["distributor_id"],
+                name=claims["name"],
+                role=claims["role"],
+                is_admin=claims["is_admin"],
+                is_distributor=claims["is_distributor"],
+                is_seller=claims["is_seller"],
+            )
             ApiUtils.bind_current_user(current_user)
             return func(*args, **kwargs)
         return wrapper

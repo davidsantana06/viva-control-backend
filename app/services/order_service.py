@@ -1,3 +1,4 @@
+from datetime import date
 from app.dtos import CreateOrderDto, CreateOrderItemDto, UpdateOrderStatusDto
 from app.exceptions import (
     CustomerNotFound,
@@ -38,25 +39,16 @@ class OrderService:
         if overdue_order:
             raise CustomerPaymentOverdue()
 
-        items, stock_updates, total_amount = cls.__prepare_items(
-            dto["items"],
-            dto["distributor_id"],
-        )
-        net_amount = cls.__calculate_net_amount(
-            total_amount,
-            dto["discount_pct"],
-        )
+        items, stock_updates = cls.__prepare_items(dto["items"], dto["distributor_id"])
 
         order = Order(
             customer_id=dto["customer_id"],
             distributor_id=dto["distributor_id"],
             seller_id=dto.get("seller_id"),
             payment_method_id=dto.get("payment_method_id"),
-            total_amount=total_amount,
             discount_pct=dto["discount_pct"],
-            net_amount=net_amount,
             payment_installments=dto["payment_installments"],
-            payment_due_date=dto["payment_due_date"],
+            payment_due_date=date.fromisoformat(dto["payment_due_date"]),
             notes=dto.get("notes"),
             status=OrderStatus.PENDING,
         )
@@ -71,16 +63,13 @@ class OrderService:
         return order
 
     @staticmethod
-    def __calculate_net_amount(total_amount: float, discount_pct: float) -> float:
-        return round(total_amount * (1 - discount_pct / 100), 2)
-
-    @staticmethod
     def find_all(
         params: UserScopedFindAllParams,
         current_user: CurrentUser,
     ) -> list[Order]:
         user_filter = UserFilterFactory.build_user_filter(
-            current_user, params.user_scoped
+            current_user,
+            params.user_scoped,
         )
         return Order.find_all(params, user_filter)
 
@@ -140,40 +129,30 @@ class OrderService:
 
     @staticmethod
     def __prepare_items(
-        items_dto: list,
+        dtos: list[CreateOrderItemDto],
         distributor_id: int,
-    ) -> tuple[list[OrderItem], list, float]:
+    ) -> tuple[list[OrderItem], list]:
         stock_updates = []
         items = []
-        total_amount = 0.0
 
-        for item_dto in items_dto:
-            product_id = item_dto["product_id"]
-            quantity = item_dto["quantity"]
-
-            product = Product.find_first_by_id(product_id)
+        for dto in dtos:
+            product = Product.find_first_by_id(dto["product_id"])
             if not product:
                 raise ProductNotFound()
 
             stock = DistributorStock.find_first_by_product_and_distributor_ids(
-                product_id,
-                distributor_id
+                dto["product_id"],
+                distributor_id,
             )
             if stock:
-                stock_updates.append((stock, quantity))
-
-            raw_price = item_dto.get("unit_price")
-            unit_price = raw_price if raw_price is not None else product.suggested_price
-            total_price = round(quantity * unit_price, 2)
-            total_amount += total_price
+                stock_updates.append((stock, dto["quantity"]))
 
             items.append(
                 OrderItem(
-                    product_id=product_id,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    total_price=total_price,
+                    product_id=dto["product_id"],
+                    quantity=dto["quantity"],
+                    unit_price=dto["unit_price"],
                 )
             )
 
-        return items, stock_updates, round(total_amount, 2)
+        return items, stock_updates

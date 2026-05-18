@@ -4,6 +4,7 @@ from typing import Self
 
 from app.extensions import db
 from app.types import FindAllParams
+from app.utils import ModelUtils
 
 from .mixin.lifecycle_mixin import LifecycleMixin
 from .mixin.model_mixin import ModelMixin
@@ -17,6 +18,8 @@ class Product(db.Model, ModelMixin, LifecycleMixin):
     description: Mapped[str | None] = set_mapped_column(Text, nullable=True)
     suggested_price: Mapped[float] = set_mapped_column(DECIMAL(15, 2))
 
+    order_items: Mapped[list["OrderItem"]] = ModelUtils.set_child_relationship("product")
+
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:
         return cls.query.filter(cls.id == id, cls.is_active.is_(True)).first()
@@ -28,13 +31,15 @@ class Product(db.Model, ModelMixin, LifecycleMixin):
     @classmethod
     def find_all(cls, params: FindAllParams) -> list[Self]:
         return (
-            cls.query
-            .filter(
+            cls.query.filter(
                 cls._mount_q_filter(params.q, cls.name, cls.sku),
-                cls.is_active.is_(True)
+                cls.is_active.is_(True),
             )
             .order_by(cls._mount_ordering(params.sort, params.order))
-            .offset(offset = cls._calculate_offset(params.page, params.per_page))
+            .offset(offset=cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)
             .all()
         )
+
+
+from .order_item import OrderItem

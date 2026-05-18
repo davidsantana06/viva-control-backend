@@ -38,7 +38,7 @@ class UserFilterFactory:
             cls.__build_unscoped_distributor_filter if not user_scoped
             else cls.__build_scoped_distributor_filter
         )
-        return strategy[current_user]
+        return strategy(current_user)
 
     @staticmethod
     def build_strict_distributor_filter(

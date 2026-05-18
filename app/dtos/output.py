@@ -67,7 +67,7 @@ class OrderItemDto(TypedDict):
     id: int
     order_id: int
     product_id: int
-    quantity: float
+    quantity: int
     unit_price: float
     total_price: float
 
@@ -79,7 +79,8 @@ class OrderDto(TypedDict):
     seller_id: NotRequired[int]
     payment_method_id: NotRequired[int]
     total_amount: float
-    discount_pct: float
+    discount_pct: int
+    discount_amount: float
     net_amount: float
     payment_installments: int
     payment_due_date: str

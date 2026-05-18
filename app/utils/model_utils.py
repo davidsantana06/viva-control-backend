@@ -30,4 +30,4 @@ class ModelUtils:
 
     @staticmethod
     def set_parent_relationship(back_populates: str) -> Relationship:
-        return set_relationship(back_populates=back_populates)
+        return set_relationship(back_populates=back_populates, lazy=True)

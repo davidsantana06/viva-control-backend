@@ -1,4 +1,4 @@
-from sqlalchemy import DECIMAL
+from sqlalchemy import DECIMAL, Integer
 from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
@@ -14,10 +14,20 @@ class OrderItem(db.Model, ModelMixin, TimestampMixin):
 
     order_id: Mapped[int] = ModelUtils.set_foreign_key_column("orders")
     product_id: Mapped[int] = ModelUtils.set_foreign_key_column("products")
-    quantity: Mapped[float] = set_mapped_column(DECIMAL(15, 4))
+    quantity: Mapped[int] = set_mapped_column(Integer)
     unit_price: Mapped[float] = set_mapped_column(DECIMAL(15, 2))
-    total_price: Mapped[float] = set_mapped_column(DECIMAL(15, 2))
+
+    order: Mapped["Order"] = ModelUtils.set_parent_relationship("items")
+    product: Mapped["Product"] = ModelUtils.set_parent_relationship("order_items")
+
+    @property
+    def total_price(self) -> float:
+        return float(self.unit_price) * self.quantity
 
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:
         return cls.query.filter(cls.id == id).first()
+
+
+from .order import Order
+from .product import Product

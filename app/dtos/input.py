@@ -86,14 +86,14 @@ class UpdateProductDto(TypedDict):
 
 class CreateOrderItemDto(TypedDict):
     product_id: int
-    quantity: float
-    unit_price: NotRequired[float]
+    quantity: int
+    unit_price: float
 
 
 class CreateOrderDto(TypedDict):
     customer_id: int
     payment_method_id: NotRequired[int]
-    discount_pct: float
+    discount_pct: int
     payment_installments: int
     payment_due_date: str
     notes: NotRequired[str]

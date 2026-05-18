@@ -20,7 +20,7 @@ order_item_model = order_ns.model(
         id=Integer(readonly=True),
         order_id=Integer(readonly=True),
         product_id=Integer(),
-        quantity=Float(),
+        quantity=Integer(),
         unit_price=Float(),
         total_price=Float(readonly=True),
         **timestamp_mixin,
@@ -36,7 +36,8 @@ order_model = order_ns.model(
         seller_id=Integer(),
         payment_method_id=Integer(),
         total_amount=Float(readonly=True),
-        discount_pct=Float(),
+        discount_pct=Integer(),
+        discount_amount=Float(readonly=True),
         net_amount=Float(readonly=True),
         payment_installments=Integer(),
         payment_due_date=Date(),
@@ -51,8 +52,8 @@ create_order_item_model = order_ns.model(
     "CreateOrderItem",
     CreateOrderItemDto(
         product_id=Integer(required=True),
-        quantity=Float(required=True),
-        unit_price=Float(),
+        quantity=Integer(required=True),
+        unit_price=Float(required=True),
     ),
 )
 
@@ -61,7 +62,7 @@ create_order_model = order_ns.model(
     CreateOrderDto(
         customer_id=Integer(required=True),
         payment_method_id=Integer(),
-        discount_pct=Float(required=True, min=0, max=100),
+        discount_pct=Integer(required=True, min=0, max=100),
         payment_installments=Integer(required=True, min=1, max=10),
         payment_due_date=Date(required=True),
         notes=String(),
