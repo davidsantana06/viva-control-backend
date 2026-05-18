@@ -43,8 +43,6 @@ class Setup:
     @staticmethod
     def __init_db(app: Flask) -> None:
         db.init_app(app)
-        with app.app_context():
-            db.create_all()
 
     @staticmethod
     def __init_migrate(app: Flask) -> None:
@@ -105,13 +103,10 @@ class Setup:
 
     @staticmethod
     def create_admin_user_if_absent(app: Flask) -> None:
-        def retrieve_dto() -> CreateUserDto:
+        def retrieve_fixture() -> CreateUserDto:
             with open(Paths.ADMIN_USER_JSON_FILE, encoding="utf-8") as file:
                 return json.load(file)
 
-        dto = retrieve_dto()
-        dto["email"] = Environs.ADMIN_EMAIL
-        dto["password"] = Environs.ADMIN_PASSWORD
         with app.app_context():
             try:
                 user = User.find_first_by_id(1)
@@ -120,18 +115,20 @@ class Setup:
             except OperationalError:
                 return
 
-            UserService.create(dto)
+            dto = retrieve_fixture()
+            dto["email"] = Environs.ADMIN_EMAIL
+            dto["password"] = Environs.ADMIN_PASSWORD
+            UserService.create(**dto)
 
     @staticmethod
     def create_default_payment_methods_if_absent(app: Flask) -> None:
-        def retrieve_dtos() -> list[CreatePaymentMethodDto]:
+        def retrieve_fixture() -> list[CreatePaymentMethodDto]:
             with open(
                 Paths.DEFAULT_PAYMENT_METHODS_JSON_FILE,
                 encoding="utf-8",
             ) as file:
                 return json.load(file)
 
-        dtos = retrieve_dtos()
         with app.app_context():
             try:
                 payment_method = PaymentMethod.find_first_by_id(1)
@@ -140,5 +137,6 @@ class Setup:
             except OperationalError:
                 return
 
+            dtos = retrieve_fixture()
             for dto in dtos:
                 PaymentMethodService.create(dto)
