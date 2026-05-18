@@ -37,7 +37,10 @@ class CustomerService:
 
     @classmethod
     def update(
-        cls, id: int, dto: UpdateCustomerDto, current_user: CurrentUser
+        cls,
+        id: int,
+        dto: UpdateCustomerDto,
+        current_user: CurrentUser,
     ) -> Customer:
         customer = cls.find_first(id, current_user)
         customer.update(**dto)

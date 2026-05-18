@@ -27,9 +27,25 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
     items: Mapped[list["OrderItem"]] = ModelUtils.set_child_relationship("order")
 
     @property
+    def is_pending(self) -> bool:
+        return self.status == OrderStatus.PENDING
+    
+    @property
+    def is_delivered_unpaid(self) -> bool:
+        return self.status == OrderStatus.DELIVERED_UNPAID
+    
+    @property
+    def is_delivered_paid(self) -> bool:
+        return self.status == OrderStatus.DELIVERED_PAID
+    
+    @property
+    def is_cancelled(self) -> bool:
+        return self.status == OrderStatus.CANCELLED
+
+    @property
     def total_amount(self) -> float:
         return sum(item.total_price for item in self.items) or 0.0
-    
+
     @property
     def discount_amount(self) -> float:
         fraction = self.discount_pct / 100
@@ -38,7 +54,6 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
     @property
     def net_amount(self) -> float:
         return self.total_amount - self.discount_amount
-
 
     @classmethod
     def find_first_by_id(cls, id: int, user_filter: UserFilter = {}) -> Self | None:
@@ -50,7 +65,7 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
         )
 
     @classmethod
-    def find_first_overdue_by_customer_id(cls, customer_id: int) -> Self | None:
+    def find_first_delivered_unpaid_by_customer_id(cls, customer_id: int) -> Self | None:
         return (
             cls.query
             .filter(

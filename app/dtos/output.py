@@ -86,6 +86,10 @@ class OrderDto(TypedDict):
     payment_due_date: str
     notes: NotRequired[str]
     status: str
+    is_pending: bool
+    is_delivered_unpaid: bool
+    is_delivered_paid: bool
+    is_cancelled: bool
     items: list[OrderItemDto]
 
 # - - -

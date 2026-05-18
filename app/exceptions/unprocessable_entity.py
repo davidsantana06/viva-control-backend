@@ -2,7 +2,7 @@ from werkzeug.exceptions import UnprocessableEntity
 from .base.api_exception import ApiException
 
 
-class CustomerPaymentOverdue(ApiException, UnprocessableEntity):
+class DelinquentCustomer(ApiException, UnprocessableEntity):
     description = "Order blocked. Customer has an overdue payment."
 
 

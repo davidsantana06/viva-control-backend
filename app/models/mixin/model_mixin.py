@@ -2,7 +2,6 @@ from flask_sqlalchemy.model import Model
 from sqlalchemy import ColumnElement, Table, asc, desc, or_, true
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Mapped
-from typing import Self
 
 from app.extensions import db
 from app.types import Filter, Ordering, SortOrder
@@ -21,7 +20,7 @@ class ModelMixin(Model):
             setattr(self, key, value)
 
     @staticmethod
-    def save(model: Self) -> None:
+    def save(model: Model) -> None:
         db.session.add(model)
         db.session.commit()
 
@@ -43,6 +42,6 @@ class ModelMixin(Model):
         return (page - 1) * per_page
 
     @staticmethod
-    def delete(model: Self) -> None:
+    def delete(model: Model) -> None:
         db.session.delete(model)
         db.session.commit()

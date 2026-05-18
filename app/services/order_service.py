@@ -1,64 +1,46 @@
-from datetime import date
-from app.dtos import CreateOrderDto, CreateOrderItemDto, UpdateOrderStatusDto
+from app.dtos import CreateOrderDto, UpdateOrderStatusDto
 from app.exceptions import (
-    CustomerNotFound,
-    CustomerPaymentOverdue,
+    DelinquentCustomer,
     OrderNotFound,
     OrderStatusTransitionInvalid,
-    ProductNotFound,
 )
 from app.extensions import db
 from app.factories import UserFilterFactory
-from app.models import Customer, DistributorStock, Order, OrderItem, Product
+from app.models import Order
 from app.types import CurrentUser, OrderStatus, UserScopedFindAllParams
 from app.utils import DtoUtils
 
+from .customer_service import CustomerService
+from .distributor_stock_service import DistributorStockService
+from .order_item_service import OrderItemService
+
 
 class OrderService:
-    __VALID_STATUS_TRANSITIONS: dict[OrderStatus, set[OrderStatus]] = {
+    __VALID_STATUS_TRANSITIONS = {
         OrderStatus.PENDING: {
             OrderStatus.CANCELLED,
             OrderStatus.DELIVERED_UNPAID,
             OrderStatus.DELIVERED_PAID,
         },
         OrderStatus.DELIVERED_UNPAID: {OrderStatus.DELIVERED_PAID},
-        OrderStatus.CANCELLED: set(),
         OrderStatus.DELIVERED_PAID: set(),
+        OrderStatus.CANCELLED: set(),
     }
 
     @classmethod
     def create(cls, dto: CreateOrderDto, current_user: CurrentUser) -> Order:
         DtoUtils.inject_user_ids(dto, current_user)
-        user_filter = UserFilterFactory.build_user_filter(current_user)
+        customer = CustomerService.find_first(dto["customer_id"], current_user)
 
-        customer = Customer.find_first_by_id(dto["customer_id"], user_filter)
-        if not customer:
-            raise CustomerNotFound()
+        du_order = Order.find_first_delivered_unpaid_by_customer_id(customer.id)
+        if du_order:
+            raise DelinquentCustomer()
 
-        overdue_order = Order.find_first_overdue_by_customer_id(customer.id)
-        if overdue_order:
-            raise CustomerPaymentOverdue()
-
-        items, stock_updates = cls.__prepare_items(dto["items"], dto["distributor_id"])
-
-        order = Order(
-            customer_id=dto["customer_id"],
-            distributor_id=dto["distributor_id"],
-            seller_id=dto.get("seller_id"),
-            payment_method_id=dto.get("payment_method_id"),
-            discount_pct=dto["discount_pct"],
-            payment_installments=dto["payment_installments"],
-            payment_due_date=date.fromisoformat(dto["payment_due_date"]),
-            notes=dto.get("notes"),
-            status=OrderStatus.PENDING,
-        )
-        order.items = items
+        order_items = OrderItemService.create_all_staged(dto.pop("items"))
+        order = Order(**dto)
+        order.items = order_items
         db.session.add(order)
-
-        for stock, quantity in stock_updates:
-            stock.current_quantity = max(0, stock.current_quantity - quantity)
-            db.session.add(stock)
-
+        DistributorStockService.deduct_all_staged(order_items, order.distributor_id)
         db.session.commit()
         return order
 
@@ -73,12 +55,14 @@ class OrderService:
         )
         return Order.find_all(params, user_filter)
 
-    @staticmethod
-    def find_first(id: int, current_user: CurrentUser) -> Order:
+    @classmethod
+    def find_first(cls, id: int, current_user: CurrentUser) -> Order:
         user_filter = UserFilterFactory.build_user_filter(current_user)
         order = Order.find_first_by_id(id, user_filter)
+
         if not order:
             raise OrderNotFound()
+
         return order
 
     @classmethod
@@ -88,71 +72,42 @@ class OrderService:
         dto: UpdateOrderStatusDto,
         current_user: CurrentUser,
     ) -> Order:
-        user_filter = UserFilterFactory.build_user_filter(current_user)
-
-        order = Order.find_first_by_id(id, user_filter)
-        if not order:
-            raise OrderNotFound()
+        order = cls.find_first(id, current_user)
 
         current_status = OrderStatus(order.status)
         new_status = OrderStatus(dto["status"])
-
-        if new_status not in cls.__VALID_STATUS_TRANSITIONS[current_status]:
-            raise OrderStatusTransitionInvalid()
-
-        if new_status == OrderStatus.CANCELLED:
-            for item in order.items:
-                stock = DistributorStock.find_first_by_product_and_distributor_ids(
-                    item.product_id,
-                    order.distributor_id,
-                )
-                if stock:
-                    stock.current_quantity = stock.current_quantity + item.quantity
-                    db.session.add(stock)
-
+        cls.__validate_status_transition(current_status, new_status)
         order.status = new_status
+
+        if order.is_cancelled:
+            DistributorStockService.restore_all_staged(
+                order.items,
+                order.distributor_id,
+            )
+
         db.session.add(order)
         db.session.commit()
         return order
 
     @classmethod
     def deactivate(cls, id: int, current_user: CurrentUser) -> None:
-        # user_scoped=True: DISTRIBUTOR only deactivates own orders (seller_id=NULL)
         user_filter = UserFilterFactory.build_user_filter(
-            current_user, user_scoped=True
+            current_user,
+            user_scoped=True,
         )
         order = Order.find_first_by_id(id, user_filter)
+
         if not order:
             raise OrderNotFound()
+
         Order.deactivate(order)
         Order.save(order)
 
-    @staticmethod
-    def __prepare_items(
-        dtos: list[CreateOrderItemDto],
-        distributor_id: int,
-    ) -> tuple[list[OrderItem], list]:
-        stock_updates = []
-        items = []
-
-        for dto in dtos:
-            product = Product.find_first_by_id(dto["product_id"])
-            if not product:
-                raise ProductNotFound()
-
-            stock = DistributorStock.find_first_by_product_and_distributor_ids(
-                dto["product_id"],
-                distributor_id,
-            )
-            if stock:
-                stock_updates.append((stock, dto["quantity"]))
-
-            items.append(
-                OrderItem(
-                    product_id=dto["product_id"],
-                    quantity=dto["quantity"],
-                    unit_price=dto["unit_price"],
-                )
-            )
-
-        return items, stock_updates
+    @classmethod
+    def __validate_status_transition(
+        cls,
+        current: OrderStatus,
+        new: OrderStatus,
+    ) -> None:
+        if new not in cls.__VALID_STATUS_TRANSITIONS[current]:
+            raise OrderStatusTransitionInvalid()

@@ -1,4 +1,4 @@
-from flask_restx.fields import Date, Float, Integer, List, Nested, String
+from flask_restx.fields import Boolean, Date, Float, Integer, List, Nested, String
 
 from app.dtos import (
     CreateOrderDto,
@@ -43,6 +43,10 @@ order_model = order_ns.model(
         payment_due_date=Date(),
         notes=String(),
         status=String(enum=list(OrderStatus), readonly=True),
+        is_pending=Boolean(readonly=True),
+        is_delivered_unpaid=Boolean(readonly=True),
+        is_delivered_paid=Boolean(readonly=True),
+        is_cancelled=Boolean(readonly=True),
         items=List(Nested(order_item_model)),
         **lifecycle_mixin,
     ),

@@ -1,3 +1,4 @@
+from datetime import date
 from typing import NotRequired, TypedDict
 
 from app.types import DocumentType, OrderStatus, UserRole
@@ -92,10 +93,12 @@ class CreateOrderItemDto(TypedDict):
 
 class CreateOrderDto(TypedDict):
     customer_id: int
+    distributor_id: NotRequired[int]
+    seller_id: NotRequired[int]
     payment_method_id: NotRequired[int]
     discount_pct: int
     payment_installments: int
-    payment_due_date: str
+    payment_due_date: date
     notes: NotRequired[str]
     items: list
 

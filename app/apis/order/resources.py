@@ -1,3 +1,4 @@
+from datetime import date
 from flask_restx import Resource
 from http import HTTPStatus
 
@@ -11,7 +12,7 @@ from app.decorators import (
 )
 from app.exceptions import (
     CustomerNotFound,
-    CustomerPaymentOverdue,
+    DelinquentCustomer,
     OrderNotFound,
     OrderStatusTransitionInvalid,
     ProductNotFound,
@@ -38,17 +39,18 @@ class OrderList(Resource):
         create_order_model,
         order_model,
         CustomerNotFound,
-        CustomerPaymentOverdue,
+        DelinquentCustomer,
         ProductNotFound,
     )
     @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def post(self):
         """Create a new order"""
         current_user = ApiUtils.resolve_current_user()
-        return (
-            OrderService.create(order_ns.payload, current_user),
-            HTTPStatus.CREATED,
-        )
+        dto = {
+            **order_ns.payload,
+            "payment_due_date": date.fromisoformat(order_ns.payload["payment_due_date"]),
+        }
+        return OrderService.create(dto, current_user), HTTPStatus.CREATED
 
     @list_resource(order_ns, __find_all_parser, order_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)

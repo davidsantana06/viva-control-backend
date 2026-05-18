@@ -1,6 +1,7 @@
 from .auth_service import AuthService
 from .customer_service import CustomerService
 from .distributor_stock_service import DistributorStockService
+from .order_item_service import OrderItemService
 from .order_service import OrderService
 from .payment_method_service import PaymentMethodService
 from .product_service import ProductService

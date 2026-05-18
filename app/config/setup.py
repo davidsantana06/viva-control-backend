@@ -118,7 +118,7 @@ class Setup:
             dto = retrieve_fixture()
             dto["email"] = Environs.ADMIN_EMAIL
             dto["password"] = Environs.ADMIN_PASSWORD
-            UserService.create(**dto)
+            UserService.create(dto)
 
     @staticmethod
     def create_default_payment_methods_if_absent(app: Flask) -> None:
