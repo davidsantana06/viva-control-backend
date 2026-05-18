@@ -54,11 +54,19 @@ pip install -r requirements.txt
 
 ### 3️⃣ Definir Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+Copie o arquivo `.env.example` para `.env` na raiz do projeto e preencha as variáveis:
 
-- `DATABASE_URI` — URI de conexão com o banco de dados (ex.: `sqlite:///database.sqlite3` ou `postgresql://user:password@host/db`).
-- `JWT_SECRET_KEY` — Chave secreta usada para assinar os tokens JWT. Deve ser uma string longa e aleatória em produção.
-- `ALLOWED_HOSTS` — Origens permitidas pelo CORS, separadas por espaço (ex.: `http://localhost:5173`).
+```bash
+cp .env.example .env
+```
+
+| Variável         | Descrição                                                                                                      |
+| ---------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ADMIN_EMAIL`    | E-mail do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.        |
+| `ADMIN_PASSWORD` | Senha do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.         |
+| `ALLOWED_HOSTS`  | Origens permitidas pelo CORS, separadas por espaço (ex.: `http://localhost:5173`). Use `*` em desenvolvimento. |
+| `DATABASE_URI`   | URI de conexão com o banco (ex.: `sqlite:///database.sqlite3` ou `postgresql://user:password@host/db`).        |
+| `JWT_SECRET_KEY` | Chave secreta para assinar os tokens JWT. Deve ser uma string longa e aleatória em produção.                   |
 
 ### 4️⃣ Aplicar Migrações
 
@@ -83,14 +91,14 @@ O backend adota os princípios da Clean Architecture como guia de organização,
   <img src="./static/img/the-clean-architecture-cone.png" alt="The Clean Architecture Cone" width="500" />
 </p>
 
-| Camada               | Diretório(s)                       |
-| -------------------- | ---------------------------------- |
-| Entities             | `models/`                          |
-| Use Cases            | `services/`                        |
-| Interface Adapters   | `schemas/`, `apis/`                |
-| Frameworks & Drivers | `config/`, `exceptions/`, `utils/` |
+| Camada               | Diretório(s)                               |
+| -------------------- | ------------------------------------------ |
+| Entities             | `models/`                                  |
+| Use Cases            | `services/`                                |
+| Interface Adapters   | `dtos/`, `apis/`, `facades/`, `factories/` |
+| Frameworks & Drivers | `config/`, `exceptions/`, `utils/`         |
 
-A implementação é majoritariamente procedural com elementos de orientação a objetos: os serviços são funções puras que operam sobre modelos ORM, enquanto os modelos utilizam mixins para compartilhar comportamento comum — persistência, timestamps e chave primária — sem herança profunda.
+A implementação é orientada a objetos com métodos predominantemente estáticos e de classe: os serviços encapsulam a lógica de negócio em classes sem estado de instância, enquanto os modelos utilizam mixins para compartilhar comportamento comum — chave primária, persistência, timestamps e inativação lógica — sem herança profunda.
 
 O controle de acesso (RBAC) com três perfis — `ADMIN`, `DISTRIBUTOR` e `SELLER` — é aplicado e validado integralmente no backend. Registros não são excluídos fisicamente: a remoção é feita por inativação (`is_active = FALSE`), preservando o histórico e os vínculos com pedidos e cobranças.
 
@@ -100,18 +108,26 @@ O controle de acesso (RBAC) com três perfis — `ADMIN`, `DISTRIBUTOR` e `SELLE
 viva-control-backend/
 ├── app/
 │   ├── apis/
+│   │   ├── auth/
+│   │   ├── customer/
+│   │   ├── distributor_stock/
+│   │   ├── order/
+│   │   ├── payment_method/
+│   │   ├── product/
+│   │   └── user/
 │   ├── config/
-│   ├── dto/
+│   ├── dtos/
 │   │   └── mixin/
 │   ├── exceptions/
 │   │   └── base/
+│   ├── facades/
+│   ├── factories/
 │   ├── models/
 │   │   └── mixin/
 │   ├── services/
-│   ├── types/
 │   └── utils/
+├── fixtures/
 ├── migrations/
-│   └── versions/
 └── static/
 ```
 
@@ -121,7 +137,7 @@ Código-fonte principal.
 
 #### 📁 `apis/`
 
-Camada de **apresentação** — Namespaces e Resources do Flask-RESTX. Cada arquivo define um Namespace com as rotas e os decorators de validação, documentação, proteção JWT e resposta. Não contém lógica de negócio: delega toda operação ao serviço correspondente.
+Camada de **apresentação** — Namespaces e Resources do Flask-RESTX. Cada subpacote organiza um Namespace em dois módulos: `models.py` (modelos Flask-RESTX expostos ao Swagger) e `resources.py` (Resources com as rotas e os decorators de validação, documentação e proteção JWT). Não contém lógica de negócio: delega toda operação ao serviço correspondente.
 
 #### 📁 `config/`
 
@@ -129,39 +145,47 @@ Configuração e inicialização da aplicação:
 
 - 📄 `paths.py` — Constantes de caminhos do sistema de arquivos.
 - 📄 `environs.py` — Variáveis de ambiente lidas via `os.environ`, com valores padrão para desenvolvimento.
-- 📄 `setup.py` — Funções de inicialização das extensões Flask: banco de dados, migrações, JWT, API e CORS.
+- 📄 `setup.py` — Inicializa as extensões Flask (banco de dados, migrações, JWT, API e CORS) e semeia o banco com os dados iniciais.
 
-#### 📁 `dto/`
+#### 📁 `dtos/`
 
-Data Transfer Objects — `TypedDict`s que tipam os payloads de entrada e saída, e modelos Flask-RESTX (`api.model()`) que os expõem ao Swagger e à camada de validação. O subdiretório `mixin/` expõe campos reutilizáveis entre DTOs.
+Data Transfer Objects — `TypedDict`s que tipam os payloads de entrada e saída.
 
 #### 📁 `exceptions/`
 
-Hierarquia de exceções HTTP da aplicação. A classe raiz `ApiException`, no subdiretório `base/`, herda de `HTTPException` e expõe o classmethod `get_specs()` para compor tuplas `(code, description)` nos decorators `@ns.response`. As exceções concretas combinam `ApiException` com as exceções HTTP do Werkzeug via herança múltipla.
+Hierarquia de exceções HTTP da aplicação.
+
+#### 📁 `facades/`
+
+Camada de fachadas de uso geral — simplificam e centralizam interfaces complexas para o restante da aplicação.
+
+#### 📁 `factories/`
+
+Classes de fábrica que produzem objetos reutilizáveis a partir dos parâmetros especificados.
 
 #### 📁 `models/`
 
-Camada de **persistência** — modelos SQLAlchemy. O subdiretório `mixin/` expõe mixins reutilizáveis: chave primária autoincrementada, métodos `save` e `update`, inativação lógica e colunas de auditoria `created_at` e `updated_at`.
+Camada de **persistência** — modelos SQLAlchemy.
 
 #### 📁 `services/`
 
 Camada de **lógica de negócio** — módulos de funções procedurais que operam sobre os modelos e orquestram as regras de cada domínio.
 
-#### 📁 `types/`
-
-Tipos compartilhados entre camadas: `Literal`, `StrEnum`, dataclasses frozen e aliases do SQLAlchemy.
-
 #### 📁 `utils/`
 
 Utilitários transversais sem vínculo com um domínio específico:
 
-- 📄 `model_mappers.py` — Funções auxiliares para declaração de colunas e relacionamentos SQLAlchemy.
-- 📄 `api_specs.py` — Helpers de Flask-RESTX: parser de parâmetros de listagem e conversão para `FindAllParams`.
-- 📄 `regexes.py` — Constantes de padrões de validação reutilizáveis.
+### 📁 `fixtures/`
+
+Dados iniciais carregados por `config/setup.py` na primeira inicialização da aplicação, caso os registros ainda não existam no banco.
 
 ### 📁 `migrations/`
 
 Gerenciado pelo Flask-Migrate, armazena os scripts de migração do banco no diretório 📁 `versions/`.
+
+### 📁 `static/`
+
+Ativos estáticos do projeto.
 
 ## 📚 Referências
 
