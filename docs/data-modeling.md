@@ -119,23 +119,21 @@
 
 ### 2.6. orders
 
-| Column               | Type          | Constraints                      | Descrição                                                                                      |
-| :------------------- | :------------ | :------------------------------- | :--------------------------------------------------------------------------------------------- |
-| id                   | INTEGER       | PK, Not Null, Auto-increment     | Identificador único                                                                            |
-| customer_id          | INTEGER       | FK(customers.id), Not Null       | Cliente do pedido                                                                              |
-| distributor_id       | INTEGER       | FK(users.id), Not Null           | Distribuidor responsável pelo escopo do pedido                                                 |
-| seller_id            | INTEGER       | FK(users.id), Nullable           | Vendedor que registrou o pedido; NULL quando criado diretamente pelo distribuidor              |
-| payment_method_id    | INTEGER       | FK(payment_methods.id), Nullable | Meio de pagamento selecionado no momento da venda                                              |
-| total_amount         | DECIMAL(15,2) | Not Null                         | Valor bruto total: soma de `order_items.total_price`; calculado na criação                     |
-| discount_pct         | DECIMAL(5,2)  | Not Null, Default 0              | Percentual de desconto aplicado sobre `total_amount`; entre 0 e 100                            |
-| net_amount           | DECIMAL(15,2) | Not Null                         | Valor líquido após desconto: `total_amount × (1 − discount_pct / 100)`; calculado e persistido |
-| payment_installments | INTEGER       | Not Null, Default 1              | Número de parcelas do pagamento; entre 1 e 10                                                  |
-| payment_due_date     | DATE          | Not Null                         | Data de vencimento do pagamento                                                                |
-| notes                | TEXT          | Nullable                         | Observação livre sobre o pedido                                                                |
-| status               | VARCHAR(16)   | Not Null, Default 'PENDING'      | Status atual do pedido                                                                         |
-| is_active            | BOOLEAN       | Not Null, Default TRUE           | Pedidos inativados saem das listagens; o histórico é preservado                                |
-| created_at           | TIMESTAMP     | Not Null, Default NOW()          | Data de criação                                                                                |
-| updated_at           | TIMESTAMP     | Not Null, Default NOW()          | Data da última atualização                                                                     |
+| Column               | Type        | Constraints                      | Descrição                                                                         |
+| :------------------- | :---------- | :------------------------------- | :-------------------------------------------------------------------------------- |
+| id                   | INTEGER     | PK, Not Null, Auto-increment     | Identificador único                                                               |
+| customer_id          | INTEGER     | FK(customers.id), Not Null       | Cliente do pedido                                                                 |
+| distributor_id       | INTEGER     | FK(users.id), Not Null           | Distribuidor responsável pelo escopo do pedido                                    |
+| seller_id            | INTEGER     | FK(users.id), Nullable           | Vendedor que registrou o pedido; NULL quando criado diretamente pelo distribuidor |
+| payment_method_id    | INTEGER     | FK(payment_methods.id), Nullable | Meio de pagamento selecionado no momento da venda                                 |
+| discount_pct         | INTEGER     | Not Null, Default 0              | Percentual de desconto aplicado sobre `total_amount`; entre 0 e 100              |
+| payment_installments | INTEGER     | Not Null, Default 1              | Número de parcelas do pagamento; entre 1 e 10                                    |
+| payment_due_date     | DATE        | Not Null                         | Data de vencimento do pagamento                                                   |
+| notes                | TEXT        | Nullable                         | Observação livre sobre o pedido                                                   |
+| status               | VARCHAR(16) | Not Null, Default 'PENDING'      | Status atual do pedido                                                            |
+| is_active            | BOOLEAN     | Not Null, Default TRUE           | Pedidos inativados saem das listagens; o histórico é preservado                   |
+| created_at           | TIMESTAMP   | Not Null, Default NOW()          | Data de criação                                                                   |
+| updated_at           | TIMESTAMP   | Not Null, Default NOW()          | Data da última atualização                                                        |
 
 > **FK:** `orders.customer_id` → `customers.id`  
 > **FK:** `orders.distributor_id` → `users.id`  
@@ -144,6 +142,8 @@
 > **CHECK:** `status IN ('PENDING', 'CANCELLED', 'DELIVERED_UNPAID', 'DELIVERED_PAID')`  
 > **CHECK:** `discount_pct BETWEEN 0 AND 100`  
 > **CHECK:** `payment_installments BETWEEN 1 AND 10`
+>
+> **Campos calculados (não persistidos):** `total_amount` = soma de `order_items.total_price`; `discount_amount` = `total_amount × discount_pct / 100`; `net_amount` = `total_amount − discount_amount`. Calculados dinamicamente como propriedades do modelo a partir dos itens carregados.
 >
 > Quando o SELLER cria o pedido: `distributor_id = seller.distributor_id`, `seller_id = seller.id`. Quando o DISTRIBUTOR cria: `distributor_id = distributor.id`, `seller_id = NULL`. A criação do pedido, dos itens e a dedução de `distributor_stocks.current_quantity` ocorrem dentro de uma única transação. Se qualquer etapa falhar, toda a operação é revertida.
 >
@@ -158,16 +158,16 @@
 
 ### 2.7. order_items
 
-| Column      | Type          | Constraints                  | Descrição                                                                                  |
-| :---------- | :------------ | :--------------------------- | :----------------------------------------------------------------------------------------- |
-| id          | INTEGER       | PK, Not Null, Auto-increment | Identificador único                                                                        |
-| order_id    | INTEGER       | FK(orders.id), Not Null      | Pedido ao qual o item pertence                                                             |
-| product_id  | INTEGER       | FK(products.id), Not Null    | Produto vendido                                                                            |
-| quantity    | DECIMAL(15,4) | Not Null                     | Quantidade vendida; deduzida de `distributor_stocks.current_quantity` na criação do pedido |
-| unit_price  | DECIMAL(15,2) | Not Null                     | Preço unitário aplicado na venda; pode diferir do `suggested_price` do produto             |
-| total_price | DECIMAL(15,2) | Not Null                     | Subtotal do item: `quantity × unit_price`, calculado e persistido na criação do pedido     |
-| created_at  | TIMESTAMP     | Not Null, Default NOW()      | Data de criação                                                                            |
-| updated_at  | TIMESTAMP     | Not Null, Default NOW()      | Data da última atualização                                                                 |
+| Column     | Type          | Constraints                  | Descrição                                                                                  |
+| :--------- | :------------ | :--------------------------- | :----------------------------------------------------------------------------------------- |
+| id         | INTEGER       | PK, Not Null, Auto-increment | Identificador único                                                                        |
+| order_id   | INTEGER       | FK(orders.id), Not Null      | Pedido ao qual o item pertence                                                             |
+| product_id | INTEGER       | FK(products.id), Not Null    | Produto vendido                                                                            |
+| quantity   | INTEGER       | Not Null                     | Quantidade vendida; deduzida de `distributor_stocks.current_quantity` na criação do pedido |
+| unit_price | DECIMAL(15,2) | Not Null                     | Preço unitário aplicado na venda; pode diferir do `suggested_price` do produto             |
+| created_at | TIMESTAMP     | Not Null, Default NOW()      | Data de criação                                                                            |
+| updated_at | TIMESTAMP     | Not Null, Default NOW()      | Data da última atualização                                                                 |
 
 > **FK:** `order_items.order_id` → `orders.id`  
-> **FK:** `order_items.product_id` → `products.id`
+> **FK:** `order_items.product_id` → `products.id`  
+> **Campo calculado (não persistido):** `total_price` = `quantity × unit_price`; calculado dinamicamente como propriedade do modelo.
