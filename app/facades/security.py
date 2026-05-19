@@ -7,7 +7,7 @@ from flask_jwt_extended import (
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.models import User
-from app.types import JwtClaims
+from app.types import JwtClaims, JwtUser
 
 
 class Security:
@@ -20,27 +20,31 @@ class Security:
         return check_password_hash(password_hash, password)
 
     @staticmethod
-    def issue_token(user: User) -> str:
+    def issue_jwt(user: User) -> str:
+        identity = str(user.id)
         return create_access_token(
-            identity=str(user.id),
-            additional_claims=JwtClaims(
-                distributor_id=user.distributor_id,
-                name=user.name,
-                role=user.role,
-                is_admin=user.is_admin,
-                is_distributor=user.is_distributor,
-                is_seller=user.is_seller,
-            ),
+            identity,
+            additional_claims={
+                "user": JwtUser(
+                    distributor_id=user.distributor_id,
+                    name=user.name,
+                    role=user.role,
+                    is_admin=user.is_admin,
+                    is_distributor=user.is_distributor,
+                    is_seller=user.is_seller,
+                ),
+            },
         )
 
     @staticmethod
-    def require_token() -> None:
+    def require_jwt() -> None:
         verify_jwt_in_request()
 
     @staticmethod
-    def get_token_identity() -> int:
-        return int(get_jwt_identity())
+    def get_jwt_identity() -> int:
+        identity = get_jwt_identity()
+        return int(identity)
 
     @staticmethod
-    def get_token_claims() -> JwtClaims:
+    def get_jwt_claims() -> JwtClaims:
         return get_jwt()

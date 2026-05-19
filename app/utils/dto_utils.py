@@ -1,4 +1,5 @@
-from app.types import CurrentUser, UserRole
+from app.dtos import CurrentUser
+from app.types import UserRole
 
 
 class DtoUtils:

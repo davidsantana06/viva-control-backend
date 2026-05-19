@@ -20,7 +20,8 @@ from app.exceptions import (
 )
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import OrderService
-from app.types import CurrentUser, UserRole
+from app.dtos import CurrentUser
+from app.types import UserRole
 from app.utils import DtoUtils
 
 from . import order_ns

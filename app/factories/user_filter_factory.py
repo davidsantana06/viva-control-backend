@@ -1,5 +1,5 @@
+from app.dtos import CurrentUser
 from app.types import (
-    CurrentUser,
     DistributorFilter,
     ScopedDistributorFilter,
     SellerFilter,

@@ -16,4 +16,4 @@ class AuthService:
         if invalid_credentials:
             raise InvalidCredentialsException()
 
-        return Security.issue_token(user)
+        return Security.issue_jwt(user)

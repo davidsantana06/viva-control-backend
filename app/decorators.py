@@ -5,33 +5,31 @@ from flask_restx import Namespace
 from flask_restx.model import Model
 from flask_restx.reqparse import RequestParser
 
-from app.exceptions import ApiException, InvalidPayloadException, RoleNotAllowedException
+from app.exceptions import (
+    ApiException,
+    InvalidPayloadException,
+    RoleNotAllowedException,
+)
 from app.facades import Security
-from app.types import CurrentUser, UserRole
+from app.dtos import CurrentUser
+from app.types import UserRole
 
 
 def auth_required(*allowed_roles: UserRole):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            Security.require_token()
-            claims = Security.get_token_claims()
+            Security.require_jwt()
+            identity, claims = Security.get_jwt_identity(), Security.get_jwt_claims()
+            current_user = CurrentUser(id=identity, **claims["user"])
 
-            role_not_allowed = claims["role"] not in allowed_roles
-            if role_not_allowed:
+            if not current_user.has_any_role(*allowed_roles):
                 raise RoleNotAllowedException()
 
-            current_user = CurrentUser(
-                id=Security.get_token_identity(),
-                distributor_id=claims["distributor_id"],
-                name=claims["name"],
-                role=claims["role"],
-                is_admin=claims["is_admin"],
-                is_distributor=claims["is_distributor"],
-                is_seller=claims["is_seller"],
-            )
             return func(*args, current_user=current_user, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -49,6 +47,7 @@ def create_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
+
     return decorator
 
 
@@ -58,6 +57,7 @@ def list_resource(ns: Namespace, request_parser: RequestParser, output_model: Mo
         func = ns.expect(request_parser)(func)
         func = ns.marshal_list_with(output_model)(func)
         return func
+
     return decorator
 
 
@@ -72,6 +72,7 @@ def get_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
+
     return decorator
 
 
@@ -89,6 +90,7 @@ def update_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
+
     return decorator
 
 
@@ -99,4 +101,5 @@ def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
+
     return decorator

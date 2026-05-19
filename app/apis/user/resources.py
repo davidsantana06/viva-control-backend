@@ -12,7 +12,8 @@ from app.decorators import (
 from app.exceptions import EmailAlreadyRegisteredException, UserNotFoundException
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import UserService
-from app.types import CurrentUser, UserRole
+from app.dtos import CurrentUser
+from app.types import UserRole
 
 from . import user_ns
 from .models import create_user_model, update_user_model, user_model

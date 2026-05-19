@@ -23,6 +23,18 @@ UserFilter = DistributorFilter | ScopedDistributorFilter | SellerFilter
 
 
 class JwtClaims(TypedDict):
+    fresh: bool
+    iat: int
+    jti: str
+    type: str
+    sub: str
+    nbf: int
+    csrf: str
+    exp: int
+    user: JwtUser
+
+
+class JwtUser(TypedDict):
     distributor_id: int | None
     name: str
     role: "UserRole"
@@ -70,17 +82,6 @@ class UserRole(StrEnum):
 
 
 # dataclass_
-
-@dataclass(frozen=True)
-class CurrentUser:
-    id: int | None
-    distributor_id: int
-    name: str
-    role: "UserRole"
-    is_admin: bool
-    is_distributor: bool
-    is_seller: bool
-
 
 @dataclass(frozen=True)
 class FindAllParams:

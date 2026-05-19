@@ -12,7 +12,8 @@ from app.decorators import (
 from app.exceptions import CustomerNotFoundException
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import CustomerService
-from app.types import CurrentUser, UserRole
+from app.dtos import CurrentUser
+from app.types import UserRole
 from app.utils import DtoUtils
 
 from . import customer_ns

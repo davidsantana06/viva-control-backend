@@ -27,4 +27,4 @@ class Protected(Resource):
     @jwt_required()
     def get(self):
         """Protected route example"""
-        return {"logged_in_as": Security.get_token_identity()}
+        return {"jwt_claims": {**Security.get_jwt_claims()}}
