@@ -1,5 +1,5 @@
 from app.dtos import CreateOrderItemDto
-from app.exceptions import ProductNotFound
+from app.exceptions import ProductNotFoundException
 from app.models import OrderItem, Product
 
 
@@ -12,7 +12,7 @@ class OrderItemService:
     def __create_staged(dto: CreateOrderItemDto) -> OrderItem:
         product = Product.find_first_by_id(dto["product_id"])
         if not product:
-            raise ProductNotFound()
+            raise ProductNotFoundException()
 
         return OrderItem(
             product_id=dto["product_id"],

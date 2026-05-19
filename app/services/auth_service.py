@@ -1,5 +1,5 @@
 from app.dtos import LoginDto
-from app.exceptions import InvalidCredentials
+from app.exceptions import InvalidCredentialsException
 from app.facades import Security
 from app.models import User
 
@@ -14,6 +14,6 @@ class AuthService:
             dto["password"]
         )
         if invalid_credentials:
-            raise InvalidCredentials()
+            raise InvalidCredentialsException()
 
         return Security.issue_token(user)

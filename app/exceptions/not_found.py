@@ -2,25 +2,39 @@ from werkzeug.exceptions import NotFound
 from .base.api_exception import ApiException
 
 
-class CustomerNotFound(ApiException, NotFound):
-    description = "Customer not found"
+_DESCRIPTION = (
+    "The requested {} was not found for the provided data. "
+    "Check the submitted values and try again."
+)
+
+_API_DESCRIPTION = "{} not found"
 
 
-class DistributorStockNotFound(ApiException, NotFound):
-    description = "Distributor stock not found"
+class CustomerNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("customer")
+    api_description = _API_DESCRIPTION.format("Customer")
 
 
-class PaymentMethodNotFound(ApiException, NotFound):
-    description = "Payment method not found"
+class DistributorStockNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("distributor stock entry")
+    api_description = _API_DESCRIPTION.format("Distributor stock entry")
 
 
-class ProductNotFound(ApiException, NotFound):
-    description = "Product not found"
+class PaymentMethodNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("payment method")
+    api_description = _API_DESCRIPTION.format("Payment method")
 
 
-class OrderNotFound(ApiException, NotFound):
-    description = "Order not found"
+class ProductNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("product")
+    api_description = _API_DESCRIPTION.format("Product")
 
 
-class UserNotFound(ApiException, NotFound):
-    description = "User not found"
+class OrderNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("order")
+    api_description = _API_DESCRIPTION.format("Order")
+
+
+class UserNotFoundException(ApiException, NotFound):
+    description = _DESCRIPTION.format("user")
+    api_description = _API_DESCRIPTION.format("User")

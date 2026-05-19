@@ -1,5 +1,8 @@
 from app.dtos import CreateDistributorStockDto, UpdateDistributorStockDto
-from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
+from app.exceptions import (
+    DistributorStockNotFoundException,
+    DistributorStockAlreadyExistsException,
+)
 from app.extensions import db
 from app.models import DistributorStock, OrderItem
 from app.types import FindAllParams, UserFilter
@@ -16,7 +19,7 @@ class DistributorStockService:
             dto["distributor_id"],
         )
         if other_stock:
-            raise DistributorStockAlreadyExists()
+            raise DistributorStockAlreadyExistsException()
 
         stock = DistributorStock(**dto)
         DistributorStock.save(stock)
@@ -46,7 +49,7 @@ class DistributorStockService:
         stock = cls.find_first(id, user_filter)
 
         if not stock:
-            raise DistributorStockNotFound()
+            raise DistributorStockNotFoundException()
 
         return stock
 
@@ -84,7 +87,7 @@ class DistributorStockService:
         )
 
         if not stock:
-            raise DistributorStockNotFound()
+            raise DistributorStockNotFoundException()
 
         stock.current_quantity = max(0, stock.current_quantity - order_item.quantity)
         db.session.add(stock)
@@ -104,7 +107,7 @@ class DistributorStockService:
         )
 
         if not stock:
-            raise DistributorStockNotFound()
+            raise DistributorStockNotFoundException()
 
         stock.current_quantity = stock.current_quantity + order_item.quantity
         db.session.add(stock)

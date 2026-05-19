@@ -3,9 +3,8 @@ from app.types import ExceptionSpecs
 
 
 class ApiException(HTTPException):
-    code: int
-    description: str
+    api_description: str
 
     @classmethod
-    def get_specs(cls) -> ExceptionSpecs:
-        return cls.code, cls.description
+    def get_api_specs(cls) -> ExceptionSpecs:
+        return cls.code, cls.api_description

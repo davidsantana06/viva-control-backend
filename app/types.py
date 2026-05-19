@@ -42,7 +42,7 @@ SortOrder = Literal["ASC", "DESC"]
 
 # tuple_
 
-ExceptionSpecs = tuple[str, int]
+ExceptionSpecs = tuple[int, str]
 
 # - - -
 

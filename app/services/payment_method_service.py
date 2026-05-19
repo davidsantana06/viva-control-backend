@@ -1,5 +1,5 @@
 from app.dtos import CreatePaymentMethodDto, UpdatePaymentMethodDto
-from app.exceptions import PaymentMethodNotFound
+from app.exceptions import PaymentMethodNotFoundException
 from app.models import PaymentMethod
 from app.types import FindAllParams
 
@@ -24,7 +24,7 @@ class PaymentMethodService:
         payment_method = cls.find_first(id)
 
         if not payment_method:
-            raise PaymentMethodNotFound()
+            raise PaymentMethodNotFoundException()
 
         return payment_method
 

@@ -1,9 +1,9 @@
 from app.dtos import CreateOrderDto, UpdateOrderStatusDto
 from app.exceptions import (
-    DelinquentCustomer,
-    OrderDeletionNotAllowed,
-    OrderNotFound,
-    OrderStatusTransitionInvalid,
+    DelinquentCustomerException,
+    InvalidOrderStatusTransitionException,
+    OrderDeletionNotAllowedException,
+    OrderNotFoundException,
 )
 from app.extensions import db
 from app.models import Order
@@ -32,7 +32,7 @@ class OrderService:
 
         du_order = Order.find_first_delivered_unpaid_by_customer_id(customer.id)
         if du_order:
-            raise DelinquentCustomer()
+            raise DelinquentCustomerException()
 
         order_items = OrderItemService.create_all_staged(dto.pop("items"))
         order = Order(**dto)
@@ -58,7 +58,7 @@ class OrderService:
         order = cls.find_first(id, user_filter)
 
         if not order:
-            raise OrderNotFound()
+            raise OrderNotFoundException()
 
         return order
 
@@ -91,7 +91,7 @@ class OrderService:
         order = cls.find_first_or_raise(id, user_filter)
 
         if not order.is_cancelled:
-            raise OrderDeletionNotAllowed()
+            raise OrderDeletionNotAllowedException()
 
         Order.delete(order)
 
@@ -102,4 +102,4 @@ class OrderService:
         new: OrderStatus,
     ) -> None:
         if new not in cls.__VALID_STATUS_TRANSITIONS[current]:
-            raise OrderStatusTransitionInvalid()
+            raise InvalidOrderStatusTransitionException()

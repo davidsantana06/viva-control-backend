@@ -9,7 +9,7 @@ from app.decorators import (
     list_resource,
     update_resource,
 )
-from app.exceptions import CustomerNotFound
+from app.exceptions import CustomerNotFoundException
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import CustomerService
 from app.types import CurrentUser, UserRole
@@ -48,7 +48,7 @@ class CustomerListResource(Resource):
 @customer_ns.route("/<int:id>")
 @customer_ns.param("id", "The customer identifier")
 class CustomerResource(Resource):
-    @get_resource(customer_ns, customer_model, CustomerNotFound)
+    @get_resource(customer_ns, customer_model, CustomerNotFoundException)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, current_user: CurrentUser):
         """Get a customer by ID"""
@@ -59,7 +59,7 @@ class CustomerResource(Resource):
         customer_ns,
         update_customer_model,
         customer_model,
-        CustomerNotFound,
+        CustomerNotFoundException,
     )
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def patch(self, id: int, current_user: CurrentUser):
@@ -67,7 +67,7 @@ class CustomerResource(Resource):
         user_filter = UserFilterFactory.build_user_filter(current_user)
         return CustomerService.update(id, customer_ns.payload, user_filter)
 
-    # @delete_resource(customer_ns, CustomerNotFound)
+    # @delete_resource(customer_ns, CustomerNotFoundException)
     # @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     # def delete(self, id: int, current_user: CurrentUser):
     #     """Delete a customer by ID"""

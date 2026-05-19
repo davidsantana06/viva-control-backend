@@ -1,5 +1,5 @@
 from app.dtos import CreateProductDto, UpdateProductDto
-from app.exceptions import ProductNotFound, SkuAlreadyInUse
+from app.exceptions import ProductNotFoundException, SkuAlreadyInUseException
 from app.models import Product
 from app.types import FindAllParams
 
@@ -9,7 +9,7 @@ class ProductService:
     def create(dto: CreateProductDto) -> Product:
         other_product = Product.find_first_by_sku(dto["sku"])
         if other_product:
-            raise SkuAlreadyInUse()
+            raise SkuAlreadyInUseException()
 
         product = Product(**dto)
         Product.save(product)
@@ -28,7 +28,7 @@ class ProductService:
         product = cls.find_first(id)
 
         if not product:
-            raise ProductNotFound()
+            raise ProductNotFoundException()
 
         return product
 
@@ -39,7 +39,7 @@ class ProductService:
         sku_is_different = dto["sku"] != product.sku
         other_product = sku_is_different and Product.find_first_by_sku(dto["sku"])
         if other_product:
-            raise SkuAlreadyInUse()
+            raise SkuAlreadyInUseException()
 
         product.update(**dto)
         Product.save(product)

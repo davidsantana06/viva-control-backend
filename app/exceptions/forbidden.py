@@ -2,13 +2,25 @@ from werkzeug.exceptions import Forbidden
 from .base.api_exception import ApiException
 
 
-class RoleNotAllowed(ApiException, Forbidden):
-    description = "User's role is not allowed to access this resource"
+class RoleNotAllowedException(ApiException, Forbidden):
+    description = (
+        "Your role does not have permission to access this resource. "
+        "Contact an administrator if access is required."
+    )
+    api_description = "User's role not allowed"
 
 
-class AdminDeletionNotAllowed(ApiException, Forbidden):
-    description = "Admin user cannot be deleted"
+class AdminDeletionNotAllowedException(ApiException, Forbidden):
+    description = (
+        "Administrator accounts cannot be deleted. "
+        "Transfer responsibilities before attempting removal."
+    )
+    api_description = "Admin deletion not allowed"
 
 
-class OrderDeletionNotAllowed(ApiException, Forbidden):
-    description = "Only cancelled orders can be deleted"
+class OrderDeletionNotAllowedException(ApiException, Forbidden):
+    description = (
+        "The order cannot be deleted in its current status. "
+        "Cancel the order before attempting to delete it."
+    )
+    api_description = "non-'PENDING' order deletion not allowed"

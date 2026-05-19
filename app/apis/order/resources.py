@@ -11,12 +11,12 @@ from app.decorators import (
     update_resource,
 )
 from app.exceptions import (
-    CustomerNotFound,
-    DelinquentCustomer,
-    OrderDeletionNotAllowed,
-    OrderNotFound,
-    OrderStatusTransitionInvalid,
-    ProductNotFound,
+    CustomerNotFoundException,
+    DelinquentCustomerException,
+    InvalidOrderStatusTransitionException,
+    OrderDeletionNotAllowedException,
+    OrderNotFoundException,
+    ProductNotFoundException,
 )
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import OrderService
@@ -39,9 +39,9 @@ class OrderListResource(Resource):
         order_ns,
         create_order_model,
         order_model,
-        CustomerNotFound,
-        DelinquentCustomer,
-        ProductNotFound,
+        CustomerNotFoundException,
+        DelinquentCustomerException,
+        ProductNotFoundException,
     )
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def post(self, current_user: CurrentUser):
@@ -73,14 +73,14 @@ class OrderListResource(Resource):
 @order_ns.route("/<int:id>")
 @order_ns.param("id", "The order identifier")
 class OrderResource(Resource):
-    @get_resource(order_ns, order_model, OrderNotFound)
+    @get_resource(order_ns, order_model, OrderNotFoundException)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, current_user: CurrentUser):
         """Get an order by ID"""
         user_filter = UserFilterFactory.build_user_filter(current_user)
         return OrderService.find_first_or_raise(id, user_filter)
 
-    @delete_resource(order_ns, OrderNotFound, OrderDeletionNotAllowed)
+    @delete_resource(order_ns, OrderNotFoundException, OrderDeletionNotAllowedException)
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def delete(self, id: int, current_user: CurrentUser):
         """Delete a cancelled order"""
@@ -96,8 +96,8 @@ class OrderStatusResource(Resource):
         order_ns,
         update_order_status_model,
         order_model,
-        OrderNotFound,
-        OrderStatusTransitionInvalid,
+        OrderNotFoundException,
+        InvalidOrderStatusTransitionException,
     )
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def patch(self, id: int, current_user: CurrentUser):

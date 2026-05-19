@@ -1,5 +1,5 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
-from app.exceptions import CustomerNotFound
+from app.exceptions import CustomerNotFoundException
 from app.models import Customer
 from app.types import UserFilter, UserScopedFindAllParams
 
@@ -27,7 +27,7 @@ class CustomerService:
         customer = cls.find_first(id, user_filter)
 
         if not customer:
-            raise CustomerNotFound()
+            raise CustomerNotFoundException()
 
         return customer
 

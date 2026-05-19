@@ -5,7 +5,7 @@ from flask_restx import Namespace
 from flask_restx.model import Model
 from flask_restx.reqparse import RequestParser
 
-from app.exceptions import ApiException, InvalidPayload, RoleNotAllowed
+from app.exceptions import ApiException, InvalidPayloadException, RoleNotAllowedException
 from app.facades import Security
 from app.types import CurrentUser, UserRole
 
@@ -19,7 +19,7 @@ def auth_required(*allowed_roles: UserRole):
 
             role_not_allowed = claims["role"] not in allowed_roles
             if role_not_allowed:
-                raise RoleNotAllowed()
+                raise RoleNotAllowedException()
 
             current_user = CurrentUser(
                 id=Security.get_token_identity(),
@@ -45,9 +45,9 @@ def create_resource(
         func = ns.doc("create", security="Bearer")(func)
         func = ns.expect(input_model)(func)
         func = ns.marshal_with(output_model, code=HTTPStatus.CREATED)(func)
-        func = ns.response(*InvalidPayload.get_specs())(func)
+        func = ns.response(*InvalidPayloadException.get_api_specs())(func)
         for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_specs())(func)
+            func = ns.response(*exc_class.get_api_specs())(func)
         return func
     return decorator
 
@@ -70,7 +70,7 @@ def get_resource(
         func = ns.doc("get", security="Bearer")(func)
         func = ns.marshal_with(output_model)(func)
         for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_specs())(func)
+            func = ns.response(*exc_class.get_api_specs())(func)
         return func
     return decorator
 
@@ -85,9 +85,9 @@ def update_resource(
         func = ns.doc("update", security="Bearer")(func)
         func = ns.expect(input_model)(func)
         func = ns.marshal_with(output_model)(func)
-        func = ns.response(*InvalidPayload.get_specs())(func)
+        func = ns.response(*InvalidPayloadException.get_api_specs())(func)
         for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_specs())(func)
+            func = ns.response(*exc_class.get_api_specs())(func)
         return func
     return decorator
 
@@ -97,6 +97,6 @@ def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
         func = ns.doc("delete", security="Bearer")(func)
         func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
         for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_specs())(func)
+            func = ns.response(*exc_class.get_api_specs())(func)
         return func
     return decorator

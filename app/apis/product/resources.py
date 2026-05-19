@@ -9,7 +9,7 @@ from app.decorators import (
     list_resource,
     update_resource,
 )
-from app.exceptions import ProductNotFound, SkuAlreadyInUse
+from app.exceptions import ProductNotFoundException, SkuAlreadyInUseException
 from app.factories import FindAllFactory
 from app.services import ProductService
 from app.types import UserRole
@@ -26,7 +26,7 @@ class ProductListResource(Resource):
         product_ns,
         create_product_model,
         product_model,
-        SkuAlreadyInUse,
+        SkuAlreadyInUseException,
     )
     @auth_required(UserRole.ADMIN)
     def post(self, **_):
@@ -44,7 +44,7 @@ class ProductListResource(Resource):
 @product_ns.route("/<int:id>")
 @product_ns.param("id", "The product identifier")
 class ProductResource(Resource):
-    @get_resource(product_ns, product_model, ProductNotFound)
+    @get_resource(product_ns, product_model, ProductNotFoundException)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, **_):
         """Get a product by ID"""
@@ -54,15 +54,15 @@ class ProductResource(Resource):
         product_ns,
         update_product_model,
         product_model,
-        ProductNotFound,
-        SkuAlreadyInUse,
+        ProductNotFoundException,
+        SkuAlreadyInUseException,
     )
     @auth_required(UserRole.ADMIN)
     def patch(self, id: int, **_):
         """Update a product by ID"""
         return ProductService.update(id, product_ns.payload)
 
-    # @delete_resource(product_ns, ProductNotFound)
+    # @delete_resource(product_ns, ProductNotFoundException)
     # @auth_required(UserRole.ADMIN)
     # def delete(self, id: int, **_):
     #     """Delete a product by ID"""

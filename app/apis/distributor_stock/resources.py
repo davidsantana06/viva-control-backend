@@ -9,7 +9,10 @@ from app.decorators import (
     list_resource,
     update_resource,
 )
-from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
+from app.exceptions import (
+    DistributorStockNotFoundException,
+    DistributorStockAlreadyExistsException,
+)
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import DistributorStockService
 from app.types import CurrentUser, UserRole
@@ -31,7 +34,7 @@ class DistributorStockListResource(Resource):
         distributor_stock_ns,
         create_distributor_stock_model,
         distributor_stock_model,
-        DistributorStockAlreadyExists,
+        DistributorStockAlreadyExistsException,
     )
     @auth_required(UserRole.DISTRIBUTOR)
     def post(self, current_user: CurrentUser):
@@ -66,7 +69,7 @@ class DistributorStockResource(Resource):
     @get_resource(
         distributor_stock_ns,
         distributor_stock_model,
-        DistributorStockNotFound,
+        DistributorStockNotFoundException,
     )
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, current_user: CurrentUser):
@@ -78,7 +81,7 @@ class DistributorStockResource(Resource):
         distributor_stock_ns,
         update_distributor_stock_model,
         distributor_stock_model,
-        DistributorStockNotFound,
+        DistributorStockNotFoundException,
     )
     @auth_required(UserRole.DISTRIBUTOR)
     def patch(self, id: int, current_user: CurrentUser):
@@ -90,7 +93,7 @@ class DistributorStockResource(Resource):
             user_filter,
         )
 
-    # @delete_resource(distributor_stock_ns, DistributorStockNotFound)
+    # @delete_resource(distributor_stock_ns, DistributorStockNotFoundException)
     # @auth_required(UserRole.DISTRIBUTOR)
     # def delete(self, id: int, current_user: CurrentUser):
     #     """Delete a stock entry by ID"""

@@ -9,7 +9,7 @@ from app.decorators import (
     list_resource,
     update_resource,
 )
-from app.exceptions import EmailAlreadyInUse, UserNotFound
+from app.exceptions import EmailAlreadyRegisteredException, UserNotFoundException
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import UserService
 from app.types import CurrentUser, UserRole
@@ -26,7 +26,7 @@ class UserListResource(Resource):
         user_ns,
         create_user_model,
         user_model,
-        EmailAlreadyInUse,
+        EmailAlreadyRegisteredException,
     )
     @auth_required(UserRole.ADMIN)
     def post(self, **_):
@@ -45,7 +45,7 @@ class UserListResource(Resource):
 @user_ns.route("/<int:id>")
 @user_ns.param("id", "The user identifier")
 class UserResource(Resource):
-    @get_resource(user_ns, user_model, UserNotFound)
+    @get_resource(user_ns, user_model, UserNotFoundException)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self, id: int, current_user: CurrentUser):
         """Get a user by ID"""
@@ -56,8 +56,8 @@ class UserResource(Resource):
         user_ns,
         update_user_model,
         user_model,
-        UserNotFound,
-        EmailAlreadyInUse,
+        UserNotFoundException,
+        EmailAlreadyRegisteredException,
     )
     @auth_required(UserRole.ADMIN)
     def patch(self, id: int, current_user: CurrentUser):
@@ -65,7 +65,7 @@ class UserResource(Resource):
         user_filter = UserFilterFactory.build_distributor_filter(current_user)
         return UserService.update(id, user_ns.payload, user_filter)
 
-    @delete_resource(user_ns, UserNotFound)
+    @delete_resource(user_ns, UserNotFoundException)
     @auth_required(UserRole.ADMIN)
     def delete(self, id: int, current_user: CurrentUser):
         """Delete a user by ID"""

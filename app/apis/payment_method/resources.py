@@ -9,7 +9,7 @@ from app.decorators import (
     list_resource,
     update_resource,
 )
-from app.exceptions import PaymentMethodNotFound
+from app.exceptions import PaymentMethodNotFoundException
 from app.factories import FindAllFactory
 from app.services import PaymentMethodService
 from app.types import UserRole
@@ -50,7 +50,7 @@ class PaymentMethodListResource(Resource):
 @payment_method_ns.route("/<int:id>")
 @payment_method_ns.param("id", "The payment method identifier")
 class PaymentMethodResource(Resource):
-    @get_resource(payment_method_ns, payment_method_model, PaymentMethodNotFound)
+    @get_resource(payment_method_ns, payment_method_model, PaymentMethodNotFoundException)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, **_):
         """Get a payment method by ID"""
@@ -60,14 +60,14 @@ class PaymentMethodResource(Resource):
         payment_method_ns,
         update_payment_method_model,
         payment_method_model,
-        PaymentMethodNotFound,
+        PaymentMethodNotFoundException,
     )
     @auth_required(UserRole.ADMIN)
     def patch(self, id: int, **_):
         """Update a payment method by ID"""
         return PaymentMethodService.update(id, payment_method_ns.payload)
 
-    # @delete_resource(payment_method_ns, PaymentMethodNotFound)
+    # @delete_resource(payment_method_ns, PaymentMethodNotFoundException)
     # @auth_required(UserRole.ADMIN)
     # def delete(self, id: int, **_):
     #     """Delete a payment method by ID"""
