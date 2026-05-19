@@ -1,4 +1,4 @@
-from sqlalchemy import DECIMAL, UniqueConstraint
+from sqlalchemy import DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
@@ -12,18 +12,14 @@ from .mixin.timestamp_mixin import TimestampMixin
 
 class DistributorStock(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "distributor_stocks"
-    __table_args__ = (
-        UniqueConstraint(
-            "product_id",
-            "distributor_id",
-            name="uq_distributor_stocks_product_id_distributor_id",
-        ),
-    )
 
     product_id: Mapped[int] = ModelUtils.set_foreign_key_column("products")
     distributor_id: Mapped[int] = ModelUtils.set_foreign_key_column("users")
     current_quantity: Mapped[float] = set_mapped_column(DECIMAL(15, 4), default=0)
     minimum_quantity: Mapped[float] = set_mapped_column(DECIMAL(15, 4), default=0)
+
+    product: Mapped["Product"] = ModelUtils.set_parent_relationship("stocks")
+    distributor: Mapped["User"] = ModelUtils.set_parent_relationship("stocks")
 
     @classmethod
     def find_first_by_id(
@@ -68,3 +64,7 @@ class DistributorStock(db.Model, ModelMixin, TimestampMixin):
             .filter(cls.current_quantity <= cls.minimum_quantity)
             .all()
         )
+
+
+from .product import Product
+from .user import User

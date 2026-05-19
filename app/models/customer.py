@@ -1,6 +1,6 @@
 from datetime import date
 from sqlalchemy import Date, String, Text
-from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
+from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column, relationship as set_relationship
 from typing import Self
 
 from app.extensions import db
@@ -23,6 +23,20 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
     address: Mapped[str | None] = set_mapped_column(Text, nullable=True)
     birth_date: Mapped[date | None] = set_mapped_column(Date, nullable=True)
     notes: Mapped[str | None] = set_mapped_column(Text, nullable=True)
+
+    distributor: Mapped["User"] = set_relationship(
+        "User",
+        foreign_keys="[Customer.distributor_id]",
+        back_populates="customers",
+        lazy=True,
+    )
+    seller: Mapped["User | None"] = set_relationship(
+        "User",
+        foreign_keys="[Customer.seller_id]",
+        lazy=True,
+    )
+
+    orders: Mapped[list["Order"]] = ModelUtils.set_child_relationship("customer")
 
     @classmethod
     def find_first_by_id(cls, id: int, user_filter: UserFilter = {}) -> Self | None:
@@ -47,3 +61,7 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
             .limit(params.per_page)
             .all()
         )
+
+
+from .order import Order
+from .user import User

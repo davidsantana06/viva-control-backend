@@ -28,6 +28,22 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         primaryjoin="foreign(User.distributor_id) == User.id",
     )
 
+    customers: Mapped[list["Customer"]] = set_relationship(
+        "Customer",
+        foreign_keys="[Customer.distributor_id]",
+        back_populates="distributor",
+        cascade="all, delete",
+        lazy=True,
+    )
+    stocks: Mapped[list["DistributorStock"]] = ModelUtils.set_child_relationship("distributor")
+    orders: Mapped[list["Order"]] = set_relationship(
+        "Order",
+        foreign_keys="[Order.distributor_id]",
+        back_populates="distributor",
+        cascade="all, delete",
+        lazy=True,
+    )
+
     @property
     def is_admin(self) -> bool:
         return self.role == UserRole.ADMIN
@@ -75,3 +91,8 @@ class User(db.Model, ModelMixin, LifecycleMixin):
             .limit(params.per_page)
             .all()
         )
+
+
+from .customer import Customer
+from .distributor_stock import DistributorStock
+from .order import Order

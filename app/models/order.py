@@ -1,6 +1,6 @@
 from datetime import date
 from sqlalchemy import Date, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
+from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column, relationship as set_relationship
 from typing import Self
 
 from app.extensions import db
@@ -23,6 +23,20 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
     payment_due_date: Mapped[date] = set_mapped_column(Date)
     notes: Mapped[str | None] = set_mapped_column(Text, nullable=True)
     status: Mapped[str] = set_mapped_column(String(16), default=OrderStatus.PENDING)
+
+    customer: Mapped["Customer"] = ModelUtils.set_parent_relationship("orders")
+    distributor: Mapped["User"] = set_relationship(
+        "User",
+        foreign_keys="[Order.distributor_id]",
+        back_populates="orders",
+        lazy=True,
+    )
+    seller: Mapped["User | None"] = set_relationship(
+        "User",
+        foreign_keys="[Order.seller_id]",
+        lazy=True,
+    )
+    payment_method: Mapped["PaymentMethod | None"] = ModelUtils.set_parent_relationship("orders")
 
     items: Mapped[list["OrderItem"]] = ModelUtils.set_child_relationship("order")
 
@@ -93,4 +107,7 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
         )
 
 
+from .customer import Customer
 from .order_item import OrderItem
+from .payment_method import PaymentMethod
+from .user import User

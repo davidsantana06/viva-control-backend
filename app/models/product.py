@@ -19,6 +19,7 @@ class Product(db.Model, ModelMixin, LifecycleMixin):
     suggested_price: Mapped[float] = set_mapped_column(DECIMAL(15, 2))
 
     order_items: Mapped[list["OrderItem"]] = ModelUtils.set_child_relationship("product")
+    stocks: Mapped[list["DistributorStock"]] = ModelUtils.set_child_relationship("product")
 
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:
@@ -43,3 +44,4 @@ class Product(db.Model, ModelMixin, LifecycleMixin):
 
 
 from .order_item import OrderItem
+from .distributor_stock import DistributorStock
