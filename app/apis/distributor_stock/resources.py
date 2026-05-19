@@ -24,7 +24,7 @@ from .models import (
 
 
 @distributor_stock_ns.route("/")
-class DistributorStockList(Resource):
+class DistributorStockListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(distributor_stock_ns)
 
     @create_resource(
@@ -52,7 +52,7 @@ class DistributorStockList(Resource):
 
 
 @distributor_stock_ns.route("/below-minimum")
-class DistributorStockBelowMinimum(Resource):
+class DistributorStockBelowMinimumResource(Resource):
     @distributor_stock_ns.doc("list_below_minimum", security="Bearer")
     @distributor_stock_ns.marshal_list_with(distributor_stock_model)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)

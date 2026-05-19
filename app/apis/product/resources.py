@@ -19,7 +19,7 @@ from .models import create_product_model, product_model, update_product_model
 
 
 @product_ns.route("/")
-class ProductList(Resource):
+class ProductListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(product_ns)
 
     @create_resource(
@@ -43,7 +43,7 @@ class ProductList(Resource):
 
 @product_ns.route("/<int:id>")
 @product_ns.param("id", "The product identifier")
-class Product(Resource):
+class ProductResource(Resource):
     @get_resource(product_ns, product_model, ProductNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int):

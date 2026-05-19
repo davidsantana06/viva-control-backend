@@ -32,7 +32,7 @@ from .models import (
 
 
 @order_ns.route("/")
-class OrderList(Resource):
+class OrderListResource(Resource):
     __find_all_parser = FindAllFactory.build_user_scoped_find_all_parser(order_ns)
 
     @create_resource(
@@ -66,7 +66,7 @@ class OrderList(Resource):
 
 @order_ns.route("/<int:id>")
 @order_ns.param("id", "The order identifier")
-class Order(Resource):
+class OrderResource(Resource):
     @get_resource(order_ns, order_model, OrderNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int):
@@ -85,7 +85,7 @@ class Order(Resource):
 
 @order_ns.route("/<int:id>/status")
 @order_ns.param("id", "The order identifier")
-class OrderStatus(Resource):
+class OrderStatusResource(Resource):
     @update_resource(
         order_ns,
         update_order_status_model,

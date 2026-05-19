@@ -20,7 +20,7 @@ from .models import create_user_model, update_user_model, user_model
 
 
 @user_ns.route("/")
-class UserList(Resource):
+class UserListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(user_ns)
 
     @create_resource(
@@ -45,7 +45,7 @@ class UserList(Resource):
 
 @user_ns.route("/<int:id>")
 @user_ns.param("id", "The user identifier")
-class User(Resource):
+class UserResource(Resource):
     @get_resource(user_ns, user_model, UserNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
     def get(self, id: int):

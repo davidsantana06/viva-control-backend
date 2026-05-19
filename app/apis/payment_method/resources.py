@@ -23,7 +23,7 @@ from .models import (
 
 
 @payment_method_ns.route("/")
-class PaymentMethodList(Resource):
+class PaymentMethodListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(payment_method_ns)
 
     @create_resource(
@@ -49,7 +49,7 @@ class PaymentMethodList(Resource):
 
 @payment_method_ns.route("/<int:id>")
 @payment_method_ns.param("id", "The payment method identifier")
-class PaymentMethod(Resource):
+class PaymentMethodResource(Resource):
     @get_resource(payment_method_ns, payment_method_model, PaymentMethodNotFound)
     @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int):

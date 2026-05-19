@@ -20,7 +20,7 @@ from .models import create_customer_model, customer_model, update_customer_model
 
 
 @customer_ns.route("/")
-class CustomerList(Resource):
+class CustomerListResource(Resource):
     __find_all_parser = FindAllFactory.build_user_scoped_find_all_parser(customer_ns)
 
     @create_resource(customer_ns, create_customer_model, customer_model)
