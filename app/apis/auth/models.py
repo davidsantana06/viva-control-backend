@@ -1,5 +1,5 @@
 from flask_restx.fields import String
-from app.dtos import AccessTokenDto, LoginDto
+from app.dtos import AccessTokenDto, LoginDto, TokenPairDto
 from . import auth_ns
 
 
@@ -15,5 +15,13 @@ access_token_model = auth_ns.model(
     "AccessToken",
     AccessTokenDto(
         access_token=String(),
+    ),
+)
+
+token_pair_model = auth_ns.model(
+    "TokenPair",
+    TokenPairDto(
+        access_token=String(),
+        refresh_token=String(),
     ),
 )

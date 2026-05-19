@@ -8,6 +8,11 @@ from app.types import UserRole
 class AccessTokenDto(TypedDict):
     access_token: str
 
+
+class TokenPairDto(TypedDict):
+    access_token: str
+    refresh_token: str
+
 # - - -
 
 

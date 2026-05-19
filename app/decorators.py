@@ -19,8 +19,8 @@ def auth_required(*allowed_roles: UserRole):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            Security.require_jwt()
-            identity, claims = Security.get_jwt_identity(), Security.get_jwt_claims()
+            Security.require_access_token()
+            identity, claims = Security.get_identity(), Security.get_claims()
             current_user = CurrentUser(id=identity, **claims["user"])
 
             role_not_allowed = allowed_roles and not current_user.has_any_role(*allowed_roles)

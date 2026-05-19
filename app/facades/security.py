@@ -1,5 +1,6 @@
 from flask_jwt_extended import (
     create_access_token,
+    create_refresh_token,
     get_jwt,
     get_jwt_identity,
     verify_jwt_in_request,
@@ -20,10 +21,9 @@ class Security:
         return check_password_hash(password_hash, password)
 
     @staticmethod
-    def issue_jwt(user: User) -> str:
-        identity = str(user.id)
+    def issue_access_token(user: User) -> str:
         return create_access_token(
-            identity,
+            str(user.id),
             additional_claims={
                 "user": JwtUser(
                     distributor_id=user.distributor_id,
@@ -37,14 +37,21 @@ class Security:
         )
 
     @staticmethod
-    def require_jwt() -> None:
+    def issue_refresh_token(user: User) -> str:
+        return create_refresh_token(str(user.id))
+
+    @staticmethod
+    def require_access_token() -> None:
         verify_jwt_in_request()
 
     @staticmethod
-    def get_jwt_identity() -> int:
-        identity = get_jwt_identity()
-        return int(identity)
+    def require_refresh_token() -> None:
+        verify_jwt_in_request(refresh=True)
 
     @staticmethod
-    def get_jwt_claims() -> JwtClaims:
+    def get_identity() -> int:
+        return int(get_jwt_identity())
+
+    @staticmethod
+    def get_claims() -> JwtClaims:
         return get_jwt()

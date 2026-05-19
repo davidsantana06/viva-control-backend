@@ -1,30 +1,36 @@
-from flask_jwt_extended import jwt_required
 from flask_restx import Resource
 
-from app.exceptions import InvalidCredentialsException, InvalidPayloadException
+from app.dtos import AccessTokenDto
+from app.exceptions import (
+    InvalidCredentialsException,
+    InvalidPayloadException,
+    UserNotFoundException,
+)
 from app.facades import Security
 from app.services import AuthService
 
 from . import auth_ns
-from .models import access_token_model, login_model
+from .models import access_token_model, login_model, token_pair_model
 
 
 @auth_ns.route("/login")
 class Login(Resource):
     @auth_ns.doc("login")
     @auth_ns.expect(login_model)
-    @auth_ns.marshal_with(access_token_model)
+    @auth_ns.marshal_with(token_pair_model)
     @auth_ns.response(*InvalidPayloadException.get_api_specs())
     @auth_ns.response(*InvalidCredentialsException.get_api_specs())
     def post(self):
-        """Authenticate and retrieve an access token"""
-        return {"access_token": AuthService.login(auth_ns.payload)}
+        """Authenticate and retrieve an access and refresh token"""
+        return AuthService.issue_token_pair(auth_ns.payload)
 
 
-@auth_ns.route("/protected")
-class Protected(Resource):
-    @auth_ns.doc("protected", security="Bearer")
-    @jwt_required()
-    def get(self):
-        """Protected route example"""
-        return {"jwt_claims": {**Security.get_jwt_claims()}}
+@auth_ns.route("/refresh")
+class Refresh(Resource):
+    @auth_ns.doc("refresh", security="Bearer")
+    @auth_ns.marshal_with(access_token_model)
+    @auth_ns.response(*UserNotFoundException.get_api_specs())
+    def post(self):
+        """Exchange a refresh token for a new access token"""
+        Security.require_refresh_token()
+        return AuthService.refresh_access_token(Security.get_identity())
