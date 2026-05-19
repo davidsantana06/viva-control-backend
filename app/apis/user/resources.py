@@ -69,7 +69,7 @@ class User(Resource):
     @delete_resource(user_ns, UserNotFound)
     @role_required(UserRole.ADMIN)
     def delete(self, id: int):
-        """Deactivate a user by ID"""
+        """Delete a user by ID"""
         current_user = ApiUtils.resolve_current_user()
-        UserService.deactivate(id, current_user)
+        UserService.delete(id, current_user)
         return "", HTTPStatus.NO_CONTENT

@@ -1,6 +1,6 @@
 from flask_restx.fields import Date, Integer, String
 
-from app.dtos import CreateCustomerDto, CustomerDto, UpdateCustomerDto, lifecycle_mixin
+from app.dtos import CreateCustomerDto, CustomerDto, UpdateCustomerDto, timestamp_mixin
 from app.types import DocumentType
 
 from . import customer_ns
@@ -19,7 +19,7 @@ customer_model = customer_ns.model(
         address=String(),
         birth_date=Date(),
         notes=String(),
-        **lifecycle_mixin,
+        **timestamp_mixin,
     ),
 )
 

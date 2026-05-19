@@ -92,10 +92,10 @@ class DistributorStockResource(Resource):
             current_user,
         )
 
-    @delete_resource(distributor_stock_ns, DistributorStockNotFound)
-    @role_required(UserRole.DISTRIBUTOR)
-    def delete(self, id: int):
-        """Delete a stock entry by ID"""
-        current_user = ApiUtils.resolve_current_user()
-        DistributorStockService.delete(id, current_user)
-        return "", HTTPStatus.NO_CONTENT
+    # @delete_resource(distributor_stock_ns, DistributorStockNotFound)
+    # @role_required(UserRole.DISTRIBUTOR)
+    # def delete(self, id: int):
+    #     """Delete a stock entry by ID"""
+    #     current_user = ApiUtils.resolve_current_user()
+    #     DistributorStockService.delete(id, current_user)
+    #     return "", HTTPStatus.NO_CONTENT

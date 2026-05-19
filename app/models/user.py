@@ -10,11 +10,11 @@ from app.extensions import db
 from app.types import DistributorFilter, FindAllParams, UserRole
 from app.utils import ModelUtils
 
-from .mixin.lifecycle_mixin import LifecycleMixin
 from .mixin.model_mixin import ModelMixin
+from .mixin.timestamp_mixin import TimestampMixin
 
 
-class User(db.Model, ModelMixin, LifecycleMixin):
+class User(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "users"
 
     distributor_id: Mapped[int | None] = ModelUtils.set_foreign_key_column("users", nullable=True)
@@ -65,7 +65,7 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(cls.id == id, cls.is_active.is_(True))
+            .filter(cls.id == id)
             .first()
         )
 
@@ -82,10 +82,7 @@ class User(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(
-                cls._mount_q_filter(params.q, cls.name, cls.email),
-                cls.is_active.is_(True)
-            )
+            .filter(cls._mount_q_filter(params.q, cls.name, cls.email))
             .order_by(cls._mount_ordering(params.sort, params.order))
             .offset(cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)

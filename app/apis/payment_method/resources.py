@@ -67,9 +67,9 @@ class PaymentMethod(Resource):
         """Update a payment method by ID"""
         return PaymentMethodService.update(id, payment_method_ns.payload)
 
-    @delete_resource(payment_method_ns, PaymentMethodNotFound)
-    @role_required(UserRole.ADMIN)
-    def delete(self, id: int):
-        """Deactivate a payment method by ID"""
-        PaymentMethodService.deactivate(id)
-        return "", HTTPStatus.NO_CONTENT
+    # @delete_resource(payment_method_ns, PaymentMethodNotFound)
+    # @role_required(UserRole.ADMIN)
+    # def delete(self, id: int):
+    #     """Delete a payment method by ID"""
+    #     PaymentMethodService.delete(id)
+    #     return "", HTTPStatus.NO_CONTENT

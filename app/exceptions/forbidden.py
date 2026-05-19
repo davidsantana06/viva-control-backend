@@ -6,5 +6,9 @@ class RoleNotAllowed(ApiException, Forbidden):
     description = "User's role is not allowed to access this resource"
 
 
-class AdminDeactivationNotAllowed(ApiException, Forbidden):
-    description = "Admin user cannot be deactivated"
+class AdminDeletionNotAllowed(ApiException, Forbidden):
+    description = "Admin user cannot be deleted"
+
+
+class OrderDeletionNotAllowed(ApiException, Forbidden):
+    description = "Only cancelled orders can be deleted"

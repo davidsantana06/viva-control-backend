@@ -7,11 +7,11 @@ from app.extensions import db
 from app.types import FindAllParams, UserFilter
 from app.utils import ModelUtils
 
-from .mixin.lifecycle_mixin import LifecycleMixin
 from .mixin.model_mixin import ModelMixin
+from .mixin.timestamp_mixin import TimestampMixin
 
 
-class Customer(db.Model, ModelMixin, LifecycleMixin):
+class Customer(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "customers"
 
     distributor_id: Mapped[int] = ModelUtils.set_foreign_key_column("users")
@@ -43,7 +43,7 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(cls.id == id, cls.is_active.is_(True))
+            .filter(cls.id == id)
             .first()
         )
 
@@ -52,10 +52,7 @@ class Customer(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(
-                cls._mount_q_filter(params.q, cls.name, cls.document),
-                cls.is_active.is_(True)
-            )
+            .filter(cls._mount_q_filter(params.q, cls.name, cls.document))
             .order_by(cls._mount_ordering(params.sort, params.order))
             .offset(offset = cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)

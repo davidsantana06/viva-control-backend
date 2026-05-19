@@ -7,11 +7,11 @@ from app.extensions import db
 from app.types import FindAllParams, OrderStatus, UserFilter
 from app.utils import ModelUtils
 
-from .mixin.lifecycle_mixin import LifecycleMixin
 from .mixin.model_mixin import ModelMixin
+from .mixin.timestamp_mixin import TimestampMixin
 
 
-class Order(db.Model, ModelMixin, LifecycleMixin):
+class Order(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "orders"
 
     customer_id: Mapped[int] = ModelUtils.set_foreign_key_column("customers")
@@ -74,7 +74,7 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(cls.id == id, cls.is_active.is_(True))
+            .filter(cls.id == id)
             .first()
         )
 
@@ -86,7 +86,6 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
                 cls.customer_id == customer_id,
                 cls.status == OrderStatus.DELIVERED_UNPAID,
                 cls.payment_due_date < date.today(),
-                cls.is_active.is_(True),
             )
             .first()
         )
@@ -96,10 +95,7 @@ class Order(db.Model, ModelMixin, LifecycleMixin):
         return (
             cls.query
             .filter_by(**user_filter)
-            .filter(
-                cls._mount_q_filter(params.q, cls.notes),
-                cls.is_active.is_(True),
-            )
+            .filter(cls._mount_q_filter(params.q, cls.notes))
             .order_by(cls._mount_ordering(params.sort, params.order))
             .offset(cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)

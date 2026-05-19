@@ -1,6 +1,6 @@
 from flask_restx.fields import Integer, String
 
-from app.dtos import CreatePaymentMethodDto, PaymentMethodDto, UpdatePaymentMethodDto, lifecycle_mixin
+from app.dtos import CreatePaymentMethodDto, PaymentMethodDto, UpdatePaymentMethodDto, timestamp_mixin
 
 from . import payment_method_ns
 
@@ -10,7 +10,7 @@ payment_method_model = payment_method_ns.model(
     PaymentMethodDto(
         id=Integer(readonly=True),
         name=String(),
-        **lifecycle_mixin,
+        **timestamp_mixin,
     ),
 )
 

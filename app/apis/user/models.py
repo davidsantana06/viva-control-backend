@@ -1,6 +1,6 @@
 from flask_restx.fields import Integer, String
 
-from app.dtos import CreateUserDto, UpdateUserDto, UserDto, lifecycle_mixin
+from app.dtos import CreateUserDto, UpdateUserDto, UserDto, timestamp_mixin
 from app.types import UserRole
 
 from . import user_ns
@@ -14,7 +14,7 @@ user_model = user_ns.model(
         name=String(),
         email=String(),
         role=String(enum=list(UserRole)),
-        **lifecycle_mixin,
+        **timestamp_mixin,
     ),
 )
 

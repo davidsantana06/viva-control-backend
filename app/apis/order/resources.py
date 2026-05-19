@@ -13,6 +13,7 @@ from app.decorators import (
 from app.exceptions import (
     CustomerNotFound,
     DelinquentCustomer,
+    OrderDeletionNotAllowed,
     OrderNotFound,
     OrderStatusTransitionInvalid,
     ProductNotFound,
@@ -73,12 +74,12 @@ class Order(Resource):
         current_user = ApiUtils.resolve_current_user()
         return OrderService.find_first(id, current_user)
 
-    @delete_resource(order_ns, OrderNotFound)
+    @delete_resource(order_ns, OrderNotFound, OrderDeletionNotAllowed)
     @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def delete(self, id: int):
-        """Deactivate an order by ID"""
+        """Delete a cancelled order"""
         current_user = ApiUtils.resolve_current_user()
-        OrderService.deactivate(id, current_user)
+        OrderService.delete(id, current_user)
         return "", HTTPStatus.NO_CONTENT
 
 

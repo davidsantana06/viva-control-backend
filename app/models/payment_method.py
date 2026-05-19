@@ -6,11 +6,11 @@ from app.extensions import db
 from app.types import FindAllParams
 from app.utils import ModelUtils
 
-from .mixin.lifecycle_mixin import LifecycleMixin
 from .mixin.model_mixin import ModelMixin
+from .mixin.timestamp_mixin import TimestampMixin
 
 
-class PaymentMethod(db.Model, ModelMixin, LifecycleMixin):
+class PaymentMethod(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "payment_methods"
 
     name: Mapped[str] = set_mapped_column(String(50))
@@ -19,16 +19,13 @@ class PaymentMethod(db.Model, ModelMixin, LifecycleMixin):
 
     @classmethod
     def find_first_by_id(cls, id: int) -> Self | None:
-        return cls.query.filter(cls.id == id, cls.is_active.is_(True)).first()
+        return cls.query.filter(cls.id == id).first()
 
     @classmethod
     def find_all(cls, params: FindAllParams) -> list[Self]:
         return (
             cls.query
-            .filter(
-                cls._mount_q_filter(params.q, cls.name),
-                cls.is_active.is_(True)
-            )
+            .filter(cls._mount_q_filter(params.q, cls.name))
             .order_by(cls._mount_ordering(params.sort, params.order))
             .offset(cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)

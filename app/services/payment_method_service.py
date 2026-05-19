@@ -32,7 +32,6 @@ class PaymentMethodService:
         return payment_method
 
     @classmethod
-    def deactivate(cls, id: int) -> None:
+    def delete(cls, id: int) -> None:
         payment_method = cls.find_first(id)
-        PaymentMethod.deactivate(payment_method)
-        PaymentMethod.save(payment_method)
+        PaymentMethod.delete(payment_method)

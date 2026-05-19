@@ -1,4 +1,4 @@
-from sqlalchemy import DECIMAL
+from sqlalchemy import DECIMAL, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
@@ -12,6 +12,13 @@ from .mixin.timestamp_mixin import TimestampMixin
 
 class DistributorStock(db.Model, ModelMixin, TimestampMixin):
     __tablename__ = "distributor_stocks"
+    __table_args__ = (
+        UniqueConstraint(
+            "product_id",
+            "distributor_id",
+            name="uq_distributor_stocks_product_id_distributor_id"
+        ),
+    )
 
     product_id: Mapped[int] = ModelUtils.set_foreign_key_column("products")
     distributor_id: Mapped[int] = ModelUtils.set_foreign_key_column("users")

@@ -48,7 +48,6 @@ class CustomerService:
         return customer
 
     @classmethod
-    def deactivate(cls, id: int, current_user: CurrentUser) -> None:
+    def delete(cls, id: int, current_user: CurrentUser) -> None:
         customer = cls.find_first(id, current_user)
-        Customer.deactivate(customer)
-        Customer.save(customer)
+        Customer.delete(customer)

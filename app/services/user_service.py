@@ -1,5 +1,5 @@
 from app.dtos import CreateUserDto, UpdateUserDto
-from app.exceptions import AdminDeactivationNotAllowed, EmailAlreadyInUse, UserNotFound
+from app.exceptions import AdminDeletionNotAllowed, EmailAlreadyInUse, UserNotFound
 from app.factories import UserFilterFactory
 from app.models import User
 from app.facades import Security
@@ -43,11 +43,10 @@ class UserService:
         return user
 
     @classmethod
-    def deactivate(cls, id: int, current_user: CurrentUser) -> None:
+    def delete(cls, id: int, current_user: CurrentUser) -> None:
         user = cls.find_first(id, current_user)
 
         if user.is_admin:
-            raise AdminDeactivationNotAllowed()
+            raise AdminDeletionNotAllowed()
 
-        User.deactivate(user)
-        User.save(user)
+        User.delete(user)

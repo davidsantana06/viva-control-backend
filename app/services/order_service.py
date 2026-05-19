@@ -1,6 +1,7 @@
 from app.dtos import CreateOrderDto, UpdateOrderStatusDto
 from app.exceptions import (
     DelinquentCustomer,
+    OrderDeletionNotAllowed,
     OrderNotFound,
     OrderStatusTransitionInvalid,
 )
@@ -90,18 +91,13 @@ class OrderService:
         return order
 
     @classmethod
-    def deactivate(cls, id: int, current_user: CurrentUser) -> None:
-        user_filter = UserFilterFactory.build_user_filter(
-            current_user,
-            user_scoped=True,
-        )
-        order = Order.find_first_by_id(id, user_filter)
+    def delete(cls, id: int, current_user: CurrentUser) -> None:
+        order = cls.find_first(id, current_user)
 
-        if not order:
-            raise OrderNotFound()
+        if not order.is_cancelled:
+            raise OrderDeletionNotAllowed()
 
-        Order.deactivate(order)
-        Order.save(order)
+        Order.delete(order)
 
     @classmethod
     def __validate_status_transition(

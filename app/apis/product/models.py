@@ -1,6 +1,6 @@
 from flask_restx.fields import Float, Integer, String
 
-from app.dtos import CreateProductDto, ProductDto, UpdateProductDto, lifecycle_mixin
+from app.dtos import CreateProductDto, ProductDto, UpdateProductDto, timestamp_mixin
 
 from . import product_ns
 
@@ -13,7 +13,7 @@ product_model = product_ns.model(
         sku=String(),
         description=String(),
         suggested_price=Float(),
-        **lifecycle_mixin,
+        **timestamp_mixin,
     ),
 )
 

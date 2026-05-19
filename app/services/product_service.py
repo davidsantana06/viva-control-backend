@@ -42,7 +42,6 @@ class ProductService:
         return product
 
     @classmethod
-    def deactivate(cls, id: int) -> None:
+    def delete(cls, id: int) -> None:
         product = cls.find_first(id)
-        Product.deactivate(product)
-        Product.save(product)
+        Product.delete(product)

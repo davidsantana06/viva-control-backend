@@ -9,9 +9,11 @@ class AuthService:
     def login(dto: LoginDto) -> str:
         user = User.find_first_by_email(dto["email"])
 
-        user_is_inactive = not user or not user.is_active
-        invalid_password = not Security.verify_password(user.password_hash, dto["password"])
-        if user_is_inactive or invalid_password:
+        invalid_credentials = not user or not Security.verify_password(
+            user.password_hash,
+            dto["password"]
+        )
+        if invalid_credentials:
             raise InvalidCredentials()
 
         return Security.issue_token(user)

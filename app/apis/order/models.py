@@ -6,7 +6,6 @@ from app.dtos import (
     OrderDto,
     OrderItemDto,
     UpdateOrderStatusDto,
-    lifecycle_mixin,
     timestamp_mixin,
 )
 from app.types import OrderStatus
@@ -48,7 +47,7 @@ order_model = order_ns.model(
         is_delivered_paid=Boolean(readonly=True),
         is_cancelled=Boolean(readonly=True),
         items=List(Nested(order_item_model)),
-        **lifecycle_mixin,
+        **timestamp_mixin,
     ),
 )
 
