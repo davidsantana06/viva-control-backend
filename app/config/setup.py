@@ -18,7 +18,6 @@ from app.apis import (
 from app.dtos import CreatePaymentMethodDto, CreateUserDto
 from app.extensions import api, cors, db, jwt, migrate
 from app.models import PaymentMethod, User
-from app.services import PaymentMethodService, UserService
 
 from .environs import Environs
 from .paths import Paths
@@ -118,7 +117,8 @@ class Setup:
             dto = retrieve_fixture()
             dto["email"] = Environs.ADMIN_EMAIL
             dto["password"] = Environs.ADMIN_PASSWORD
-            UserService.create(dto)
+            user = User(**dto)
+            User.save(user)
 
     @staticmethod
     def create_default_payment_methods_if_absent(app: Flask) -> None:
@@ -139,4 +139,5 @@ class Setup:
 
             dtos = retrieve_fixture()
             for dto in dtos:
-                PaymentMethodService.create(dto)
+                payment_method = PaymentMethod(**dto)
+                PaymentMethod.save(payment_method)
