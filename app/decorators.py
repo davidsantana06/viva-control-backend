@@ -23,13 +23,12 @@ def auth_required(*allowed_roles: UserRole):
             identity, claims = Security.get_jwt_identity(), Security.get_jwt_claims()
             current_user = CurrentUser(id=identity, **claims["user"])
 
-            if not current_user.has_any_role(*allowed_roles):
+            role_not_allowed = allowed_roles and not current_user.has_any_role(*allowed_roles)
+            if role_not_allowed:
                 raise RoleNotAllowedException()
 
             return func(*args, current_user=current_user, **kwargs)
-
         return wrapper
-
     return decorator
 
 
@@ -47,7 +46,6 @@ def create_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
-
     return decorator
 
 
@@ -57,7 +55,6 @@ def list_resource(ns: Namespace, request_parser: RequestParser, output_model: Mo
         func = ns.expect(request_parser)(func)
         func = ns.marshal_list_with(output_model)(func)
         return func
-
     return decorator
 
 
@@ -72,7 +69,6 @@ def get_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
-
     return decorator
 
 
@@ -90,18 +86,26 @@ def update_resource(
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
-
     return decorator
 
 
-def patch_resource(ns: Namespace, *exception_classes: type[ApiException]):
+def activate_resource(ns: Namespace, *exception_classes: type[ApiException]):
     def decorator(func):
-        func = ns.doc("patch", security="Bearer")(func)
+        func = ns.doc("activate", security="Bearer")(func)
         func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
+    return decorator
 
+
+def deactivate_resource(ns: Namespace, *exception_classes: type[ApiException]):
+    def decorator(func):
+        func = ns.doc("deactivate", security="Bearer")(func)
+        func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
+        for exc_class in exception_classes:
+            func = ns.response(*exc_class.get_api_specs())(func)
+        return func
     return decorator
 
 
@@ -112,5 +116,4 @@ def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
-
     return decorator

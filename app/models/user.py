@@ -62,9 +62,14 @@ class User(db.Model, ModelMixin, TimestampMixin):
     @property
     def is_seller(self) -> bool:
         return self.role == UserRole.SELLER
+    
+    @classmethod
+    def toggle_activation(cls, user: Self) -> None:
+        cls.toggle_activation_staged(user)
+        cls.save(user)
 
     @staticmethod
-    def toggle_activation(user: "User") -> None:
+    def toggle_activation_staged(user: Self) -> None:
         user.is_active = not user.is_active
 
     @classmethod
@@ -79,6 +84,22 @@ class User(db.Model, ModelMixin, TimestampMixin):
             cls.query
             .filter_by(**user_filter)
             .filter(cls.id == id, cls.is_active == is_active)
+            .first()
+        )
+
+    @classmethod
+    def find_first_by_id_and_role(
+        cls,
+        id: int,
+        user_filter: DistributorFilter = {},
+        *,
+        role: UserRole,
+        is_active: bool = True,
+    ) -> Self | None:
+        return (
+            cls.query
+            .filter_by(**user_filter)
+            .filter(cls.id == id, cls.is_active == is_active, cls.role == role)
             .first()
         )
 
@@ -99,6 +120,25 @@ class User(db.Model, ModelMixin, TimestampMixin):
             cls.query
             .filter_by(**user_filter)
             .filter(cls._mount_q_filter(params.q, cls.name, cls.email))
+            .order_by(cls._mount_ordering(params.sort, params.order))
+            .offset(cls._calculate_offset(params.page, params.per_page))
+            .limit(params.per_page)
+            .all()
+        )
+
+    @classmethod
+    def find_all_by_role(
+        cls,
+        params: FindAllParams,
+        user_filter: DistributorFilter = {},
+        *,
+        role: UserRole,
+    ) -> list[Self]:
+        return (
+            cls.query
+            .filter_by(**user_filter)
+            .filter(cls._mount_q_filter(params.q, cls.name, cls.email))
+            .filter(cls.role == role)
             .order_by(cls._mount_ordering(params.sort, params.order))
             .offset(cls._calculate_offset(params.page, params.per_page))
             .limit(params.per_page)
