@@ -2,18 +2,17 @@ from flask_restx import Resource
 from http import HTTPStatus
 
 from app.decorators import (
+    auth_required,
     create_resource,
     delete_resource,
     get_resource,
     list_resource,
-    role_required,
     update_resource,
 )
 from app.exceptions import CustomerNotFound
 from app.factories import FindAllFactory
 from app.services import CustomerService
-from app.types import UserRole
-from app.utils import ApiUtils
+from app.types import CurrentUser, UserRole
 
 from . import customer_ns
 from .models import create_customer_model, customer_model, update_customer_model
@@ -24,20 +23,18 @@ class CustomerListResource(Resource):
     __find_all_parser = FindAllFactory.build_user_scoped_find_all_parser(customer_ns)
 
     @create_resource(customer_ns, create_customer_model, customer_model)
-    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def post(self):
+    @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def post(self, current_user: CurrentUser):
         """Create a new customer"""
-        current_user = ApiUtils.resolve_current_user()
         return (
             CustomerService.create(customer_ns.payload, current_user),
             HTTPStatus.CREATED,
         )
 
     @list_resource(customer_ns, __find_all_parser, customer_model)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, current_user: CurrentUser):
         """Get all customers"""
-        current_user = ApiUtils.resolve_current_user()
         find_all_params = FindAllFactory.build_user_scoped_find_all_params(
             self.__find_all_parser,
         )
@@ -48,10 +45,9 @@ class CustomerListResource(Resource):
 @customer_ns.param("id", "The customer identifier")
 class CustomerResource(Resource):
     @get_resource(customer_ns, customer_model, CustomerNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self, id: int):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, id: int, current_user: CurrentUser):
         """Get a customer by ID"""
-        current_user = ApiUtils.resolve_current_user()
         return CustomerService.find_first(id, current_user)
 
     @update_resource(
@@ -60,16 +56,14 @@ class CustomerResource(Resource):
         customer_model,
         CustomerNotFound,
     )
-    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def patch(self, id: int):
+    @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def patch(self, id: int, current_user: CurrentUser):
         """Update a customer by ID"""
-        current_user = ApiUtils.resolve_current_user()
         return CustomerService.update(id, customer_ns.payload, current_user)
 
     # @delete_resource(customer_ns, CustomerNotFound)
-    # @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    # def delete(self, id: int):
+    # @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    # def delete(self, id: int, current_user: CurrentUser):
     #     """Delete a customer by ID"""
-    #     current_user = ApiUtils.resolve_current_user()
     #     CustomerService.delete(id, current_user)
     #     return "", HTTPStatus.NO_CONTENT

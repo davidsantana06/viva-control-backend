@@ -3,11 +3,11 @@ from flask_restx import Resource
 from http import HTTPStatus
 
 from app.decorators import (
+    auth_required,
     create_resource,
     delete_resource,
     get_resource,
     list_resource,
-    role_required,
     update_resource,
 )
 from app.exceptions import (
@@ -20,8 +20,7 @@ from app.exceptions import (
 )
 from app.factories import FindAllFactory
 from app.services import OrderService
-from app.types import UserRole
-from app.utils import ApiUtils
+from app.types import CurrentUser, UserRole
 
 from . import order_ns
 from .models import (
@@ -43,21 +42,21 @@ class OrderListResource(Resource):
         DelinquentCustomer,
         ProductNotFound,
     )
-    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def post(self):
+    @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def post(self, current_user: CurrentUser):
         """Create a new order"""
-        current_user = ApiUtils.resolve_current_user()
         dto = {
             **order_ns.payload,
-            "payment_due_date": date.fromisoformat(order_ns.payload["payment_due_date"]),
+            "payment_due_date": date.fromisoformat(
+                order_ns.payload["payment_due_date"]
+            ),
         }
         return OrderService.create(dto, current_user), HTTPStatus.CREATED
 
     @list_resource(order_ns, __find_all_parser, order_model)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, current_user: CurrentUser):
         """Get all orders"""
-        current_user = ApiUtils.resolve_current_user()
         find_all_params = FindAllFactory.build_user_scoped_find_all_params(
             self.__find_all_parser,
         )
@@ -68,17 +67,15 @@ class OrderListResource(Resource):
 @order_ns.param("id", "The order identifier")
 class OrderResource(Resource):
     @get_resource(order_ns, order_model, OrderNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self, id: int):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, id: int, current_user: CurrentUser):
         """Get an order by ID"""
-        current_user = ApiUtils.resolve_current_user()
         return OrderService.find_first(id, current_user)
 
     @delete_resource(order_ns, OrderNotFound, OrderDeletionNotAllowed)
-    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def delete(self, id: int):
+    @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def delete(self, id: int, current_user: CurrentUser):
         """Delete a cancelled order"""
-        current_user = ApiUtils.resolve_current_user()
         OrderService.delete(id, current_user)
         return "", HTTPStatus.NO_CONTENT
 
@@ -93,8 +90,7 @@ class OrderStatusResource(Resource):
         OrderNotFound,
         OrderStatusTransitionInvalid,
     )
-    @role_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def patch(self, id: int):
+    @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def patch(self, id: int, current_user: CurrentUser):
         """Update the status of an order"""
-        current_user = ApiUtils.resolve_current_user()
         return OrderService.update_status(id, order_ns.payload, current_user)

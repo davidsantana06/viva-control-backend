@@ -2,18 +2,17 @@ from flask_restx import Resource
 from http import HTTPStatus
 
 from app.decorators import (
+    auth_required,
     create_resource,
     delete_resource,
     get_resource,
     list_resource,
-    role_required,
     update_resource,
 )
 from app.exceptions import EmailAlreadyInUse, UserNotFound
 from app.factories import FindAllFactory
 from app.services import UserService
-from app.types import UserRole
-from app.utils import ApiUtils
+from app.types import CurrentUser, UserRole
 
 from . import user_ns
 from .models import create_user_model, update_user_model, user_model
@@ -29,16 +28,15 @@ class UserListResource(Resource):
         user_model,
         EmailAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN)
-    def post(self):
+    @auth_required(UserRole.ADMIN)
+    def post(self, **_):
         """Create a new user"""
         return UserService.create(user_ns.payload), HTTPStatus.CREATED
 
     @list_resource(user_ns, __find_all_parser, user_model)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
-    def get(self):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    def get(self, current_user: CurrentUser):
         """Get all users"""
-        current_user = ApiUtils.resolve_current_user()
         find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return UserService.find_all(find_all_params, current_user)
 
@@ -47,10 +45,9 @@ class UserListResource(Resource):
 @user_ns.param("id", "The user identifier")
 class UserResource(Resource):
     @get_resource(user_ns, user_model, UserNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
-    def get(self, id: int):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    def get(self, id: int, current_user: CurrentUser):
         """Get a user by ID"""
-        current_user = ApiUtils.resolve_current_user()
         return UserService.find_first(id, current_user)
 
     @update_resource(
@@ -60,16 +57,14 @@ class UserResource(Resource):
         UserNotFound,
         EmailAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN)
-    def patch(self, id: int):
+    @auth_required(UserRole.ADMIN)
+    def patch(self, id: int, current_user: CurrentUser):
         """Update a user by ID"""
-        current_user = ApiUtils.resolve_current_user()
         return UserService.update(id, user_ns.payload, current_user)
 
     @delete_resource(user_ns, UserNotFound)
-    @role_required(UserRole.ADMIN)
-    def delete(self, id: int):
+    @auth_required(UserRole.ADMIN)
+    def delete(self, id: int, current_user: CurrentUser):
         """Delete a user by ID"""
-        current_user = ApiUtils.resolve_current_user()
         UserService.delete(id, current_user)
         return "", HTTPStatus.NO_CONTENT

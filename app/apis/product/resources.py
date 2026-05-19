@@ -2,11 +2,11 @@ from flask_restx import Resource
 from http import HTTPStatus
 
 from app.decorators import (
+    auth_required,
     create_resource,
     delete_resource,
     get_resource,
     list_resource,
-    role_required,
     update_resource,
 )
 from app.exceptions import ProductNotFound, SkuAlreadyInUse
@@ -28,14 +28,14 @@ class ProductListResource(Resource):
         product_model,
         SkuAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN)
-    def post(self):
+    @auth_required(UserRole.ADMIN)
+    def post(self, **_):
         """Create a new product"""
         return ProductService.create(product_ns.payload), HTTPStatus.CREATED
 
     @list_resource(product_ns, __find_all_parser, product_model)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, **_):
         """Get all products"""
         find_all_params = FindAllFactory.build_find_all_params(self.__find_all_parser)
         return ProductService.find_all(find_all_params)
@@ -45,8 +45,8 @@ class ProductListResource(Resource):
 @product_ns.param("id", "The product identifier")
 class ProductResource(Resource):
     @get_resource(product_ns, product_model, ProductNotFound)
-    @role_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
-    def get(self, id: int):
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
+    def get(self, id: int, **_):
         """Get a product by ID"""
         return ProductService.find_first(id)
 
@@ -57,14 +57,14 @@ class ProductResource(Resource):
         ProductNotFound,
         SkuAlreadyInUse,
     )
-    @role_required(UserRole.ADMIN)
-    def patch(self, id: int):
+    @auth_required(UserRole.ADMIN)
+    def patch(self, id: int, **_):
         """Update a product by ID"""
         return ProductService.update(id, product_ns.payload)
 
     # @delete_resource(product_ns, ProductNotFound)
-    # @role_required(UserRole.ADMIN)
-    # def delete(self, id: int):
+    # @auth_required(UserRole.ADMIN)
+    # def delete(self, id: int, **_):
     #     """Delete a product by ID"""
     #     ProductService.delete(id)
     #     return "", HTTPStatus.NO_CONTENT
