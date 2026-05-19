@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from enum import StrEnum
 from sqlalchemy import ColumnElement, UnaryExpression
 from typing import Literal, TypedDict
@@ -77,24 +76,6 @@ class UserRole(StrEnum):
     ADMIN = "ADMIN"
     DISTRIBUTOR = "DISTRIBUTOR"
     SELLER = "SELLER"
-
-# - - -
-
-
-# dataclass_
-
-@dataclass(frozen=True)
-class FindAllParams:
-    q: str | None
-    order: SortOrder
-    sort: str
-    page: int
-    per_page: int
-
-
-@dataclass(frozen=True)
-class UserScopedFindAllParams(FindAllParams):
-    user_scoped: bool = False
 
 # - - -
 

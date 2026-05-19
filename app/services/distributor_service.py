@@ -1,7 +1,8 @@
 from app.exceptions import UserNotFoundException
 from app.extensions import db
 from app.models import User
-from app.types import FindAllParams, UserFilter, UserRole
+from app.dtos import FindAllParams
+from app.types import UserFilter, UserRole
 
 from .base import UserService
 

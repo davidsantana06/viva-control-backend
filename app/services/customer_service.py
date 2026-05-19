@@ -1,7 +1,8 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
 from app.exceptions import CustomerNotFoundException
 from app.models import Customer
-from app.types import UserFilter, UserScopedFindAllParams
+from app.dtos import UserScopedFindAllParams
+from app.types import UserFilter
 
 
 class CustomerService:

@@ -7,7 +7,8 @@ from app.exceptions import (
 )
 from app.extensions import db
 from app.models import Order
-from app.types import OrderStatus, UserFilter, UserScopedFindAllParams
+from app.dtos import UserScopedFindAllParams
+from app.types import OrderStatus, UserFilter
 
 from .customer_service import CustomerService
 from .distributor_stock_service import DistributorStockService

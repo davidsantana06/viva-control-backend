@@ -3,7 +3,8 @@ from flask_restx.inputs import boolean
 from flask_restx.reqparse import RequestParser
 from typing import get_args
 
-from app.types import FindAllParams, SortOrder, UserScopedFindAllParams
+from app.dtos import FindAllParams, UserScopedFindAllParams
+from app.types import SortOrder
 
 
 class FindAllFactory:

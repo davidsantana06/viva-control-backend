@@ -1,7 +1,7 @@
 from app.dtos import CreateProductDto, UpdateProductDto
 from app.exceptions import ProductNotFoundException, SkuAlreadyInUseException
 from app.models import Product
-from app.types import FindAllParams
+from app.dtos import FindAllParams
 
 
 class ProductService:

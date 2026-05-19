@@ -1,7 +1,7 @@
 from app.dtos import CreatePaymentMethodDto, UpdatePaymentMethodDto
 from app.exceptions import PaymentMethodNotFoundException
 from app.models import PaymentMethod
-from app.types import FindAllParams
+from app.dtos import FindAllParams
 
 
 class PaymentMethodService:

@@ -5,7 +5,8 @@ from app.exceptions import (
 )
 from app.extensions import db
 from app.models import DistributorStock, OrderItem
-from app.types import FindAllParams, UserFilter
+from app.dtos import FindAllParams
+from app.types import UserFilter
 
 
 class DistributorStockService:

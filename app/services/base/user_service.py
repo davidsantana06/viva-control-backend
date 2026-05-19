@@ -4,7 +4,8 @@ from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import EmailAlreadyRegisteredException
 from app.facades import Security
 from app.models import User
-from app.types import FindAllParams, UserFilter
+from app.dtos import FindAllParams
+from app.types import UserFilter
 
 
 class UserService(ABC):
