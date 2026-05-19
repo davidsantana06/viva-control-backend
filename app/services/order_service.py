@@ -15,17 +15,6 @@ from .order_item_service import OrderItemService
 
 
 class OrderService:
-    __VALID_STATUS_TRANSITIONS = {
-        OrderStatus.PENDING: {
-            OrderStatus.CANCELLED,
-            OrderStatus.DELIVERED_UNPAID,
-            OrderStatus.DELIVERED_PAID,
-        },
-        OrderStatus.DELIVERED_UNPAID: {OrderStatus.DELIVERED_PAID},
-        OrderStatus.DELIVERED_PAID: set(),
-        OrderStatus.CANCELLED: set(),
-    }
-
     @classmethod
     def create(cls, dto: CreateOrderDto, user_filter: UserFilter) -> Order:
         customer = CustomerService.find_first_or_raise(dto["customer_id"], user_filter)
@@ -70,10 +59,11 @@ class OrderService:
         user_filter: UserFilter,
     ) -> Order:
         order = cls.find_first_or_raise(id, user_filter)
-
-        current_status = OrderStatus(order.status)
         new_status = OrderStatus(dto["status"])
-        cls.__validate_status_transition(current_status, new_status)
+
+        if not order.can_transition_to(new_status):
+            raise InvalidOrderStatusTransitionException()
+
         order.status = new_status
 
         if order.is_cancelled:
@@ -94,12 +84,3 @@ class OrderService:
             raise OrderDeletionNotAllowedException()
 
         Order.delete(order)
-
-    @classmethod
-    def __validate_status_transition(
-        cls,
-        current: OrderStatus,
-        new: OrderStatus,
-    ) -> None:
-        if new not in cls.__VALID_STATUS_TRANSITIONS[current]:
-            raise InvalidOrderStatusTransitionException()

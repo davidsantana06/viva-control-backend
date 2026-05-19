@@ -12,6 +12,17 @@ from .mixin.timestamp_mixin import TimestampMixin
 
 
 class Order(db.Model, ModelMixin, TimestampMixin):
+    __VALID_STATUS_TRANSITIONS = {
+        OrderStatus.PENDING: {
+            OrderStatus.CANCELLED,
+            OrderStatus.DELIVERED_UNPAID,
+            OrderStatus.DELIVERED_PAID,
+        },
+        OrderStatus.DELIVERED_UNPAID: {OrderStatus.DELIVERED_PAID},
+        OrderStatus.DELIVERED_PAID: set(),
+        OrderStatus.CANCELLED: set(),
+    }
+
     __tablename__ = "orders"
 
     customer_id: Mapped[int] = ModelUtils.set_foreign_key_column("customers")
@@ -68,6 +79,10 @@ class Order(db.Model, ModelMixin, TimestampMixin):
     @property
     def net_amount(self) -> float:
         return self.total_amount - self.discount_amount
+    
+    def can_transition_to(self, new_status: OrderStatus) -> bool:
+        current = OrderStatus(self.status)
+        return new_status in self.__VALID_STATUS_TRANSITIONS[current]
 
     @classmethod
     def find_first_by_id(cls, id: int, user_filter: UserFilter = {}) -> Self | None:
