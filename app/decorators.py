@@ -2,7 +2,7 @@ from functools import wraps
 from http import HTTPStatus
 
 from flask_restx import Namespace
-from flask_restx.model import Model
+from flask_restx.model import Model as ApiModel
 from flask_restx.reqparse import RequestParser
 
 from app.exceptions import (
@@ -34,8 +34,8 @@ def auth_required(*allowed_roles: UserRole):
 
 def create_resource(
     ns: Namespace,
-    input_model: Model,
-    output_model: Model,
+    input_model: ApiModel,
+    output_model: ApiModel,
     *exception_classes: type[ApiException],
 ):
     def decorator(func):
@@ -49,7 +49,7 @@ def create_resource(
     return decorator
 
 
-def list_resource(ns: Namespace, request_parser: RequestParser, output_model: Model):
+def list_resource(ns: Namespace, request_parser: RequestParser, output_model: ApiModel):
     def decorator(func):
         func = ns.doc("list", security="Bearer")(func)
         func = ns.expect(request_parser)(func)
@@ -60,7 +60,7 @@ def list_resource(ns: Namespace, request_parser: RequestParser, output_model: Mo
 
 def get_resource(
     ns: Namespace,
-    output_model: Model,
+    output_model: ApiModel,
     *exception_classes: type[ApiException],
 ):
     def decorator(func):
@@ -74,8 +74,8 @@ def get_resource(
 
 def update_resource(
     ns: Namespace,
-    input_model: Model,
-    output_model: Model,
+    input_model: ApiModel,
+    output_model: ApiModel,
     *exception_classes: type[ApiException],
 ):
     def decorator(func):

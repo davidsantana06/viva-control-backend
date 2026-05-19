@@ -24,7 +24,7 @@ from .. import user_ns
 from ..models import create_user_model, update_user_model, user_model
 
 
-@user_ns.route("/sellers")
+@user_ns.route("/seller")
 class SellerListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(user_ns)
 
@@ -50,7 +50,7 @@ class SellerListResource(Resource):
         return SellerService.find_all(find_all_params, user_filter)
 
 
-@user_ns.route("/sellers/<int:id>")
+@user_ns.route("/seller/<int:id>")
 @user_ns.param("id", "The seller identifier")
 class SellerResource(Resource):
     @get_resource(user_ns, user_model, UserNotFoundException)
@@ -74,7 +74,7 @@ class SellerResource(Resource):
         return SellerService.update(id, user_ns.payload, user_filter)
 
 
-@user_ns.route("/sellers/<int:id>/activate")
+@user_ns.route("/seller/<int:id>/activate")
 @user_ns.param("id", "The seller identifier")
 class SellerActivateResource(Resource):
     @activate_resource(user_ns, UserNotFoundException)
@@ -86,7 +86,7 @@ class SellerActivateResource(Resource):
         return "", HTTPStatus.NO_CONTENT
 
 
-@user_ns.route("/sellers/<int:id>/deactivate")
+@user_ns.route("/seller/<int:id>/deactivate")
 @user_ns.param("id", "The seller identifier")
 class SellerDeactivateResource(Resource):
     @deactivate_resource(user_ns, UserNotFoundException)

@@ -22,7 +22,7 @@ from .. import user_ns
 from ..models import create_user_model, update_user_model, user_model
 
 
-@user_ns.route("/distributors")
+@user_ns.route("/distributor")
 class DistributorListResource(Resource):
     __find_all_parser = FindAllFactory.build_find_all_parser(user_ns)
 
@@ -46,7 +46,7 @@ class DistributorListResource(Resource):
         return DistributorService.find_all(find_all_params)
 
 
-@user_ns.route("/distributors/<int:id>")
+@user_ns.route("/distributor/<int:id>")
 @user_ns.param("id", "The distributor identifier")
 class DistributorResource(Resource):
     @get_resource(user_ns, user_model, UserNotFoundException)
@@ -68,7 +68,7 @@ class DistributorResource(Resource):
         return DistributorService.update(id, user_ns.payload)
 
 
-@user_ns.route("/distributors/<int:id>/activate")
+@user_ns.route("/distributor/<int:id>/activate")
 @user_ns.param("id", "The distributor identifier")
 class DistributorActivateResource(Resource):
     @activate_resource(user_ns, UserNotFoundException)
@@ -79,7 +79,7 @@ class DistributorActivateResource(Resource):
         return "", HTTPStatus.NO_CONTENT
 
 
-@user_ns.route("/distributors/<int:id>/deactivate")
+@user_ns.route("/distributor/<int:id>/deactivate")
 @user_ns.param("id", "The distributor identifier")
 class DistributorDeactivateResource(Resource):
     @deactivate_resource(user_ns, UserNotFoundException)

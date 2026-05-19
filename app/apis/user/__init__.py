@@ -3,7 +3,7 @@ from flask_restx import Namespace
 user_ns = Namespace(
     "user",
     description="User management operations",
-    path="/",
+    path="/users",
     validate=True,
 )
 
