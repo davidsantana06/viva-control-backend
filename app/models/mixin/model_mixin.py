@@ -38,10 +38,6 @@ class ModelMixin(Model):
         return asc(sort_column) if is_ascending else desc(sort_column)
 
     @staticmethod
-    def _calculate_offset(page: int, per_page: int) -> int:
-        return (page - 1) * per_page
-
-    @staticmethod
     def delete(model: Model) -> None:
         db.session.delete(model)
         db.session.commit()

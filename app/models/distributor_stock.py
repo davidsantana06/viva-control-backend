@@ -3,7 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
 from app.extensions import db
-from app.types import FindAllParams, DistributorFilter
+from app.dtos import FindAllParams
+from app.types import DistributorFilter
 from app.utils import ModelUtils
 
 from .mixin.model_mixin import ModelMixin
@@ -58,7 +59,7 @@ class DistributorStock(db.Model, ModelMixin, TimestampMixin):
             cls.query
             .filter_by(**user_filter)
             .order_by(cls._mount_ordering(params.sort, params.order))
-            .offset(cls._calculate_offset(params.page, params.per_page))
+            .offset(params.offset)
             .limit(params.per_page)
             .all()
         )

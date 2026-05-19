@@ -7,7 +7,8 @@ from sqlalchemy.orm import (
 from typing import Self
 
 from app.extensions import db
-from app.types import DistributorFilter, FindAllParams, UserRole
+from app.dtos import FindAllParams
+from app.types import DistributorFilter, UserRole
 from app.utils import ModelUtils
 
 from .mixin.model_mixin import ModelMixin
@@ -121,7 +122,7 @@ class User(db.Model, ModelMixin, TimestampMixin):
             .filter_by(**user_filter)
             .filter(cls._mount_q_filter(params.q, cls.name, cls.email))
             .order_by(cls._mount_ordering(params.sort, params.order))
-            .offset(cls._calculate_offset(params.page, params.per_page))
+            .offset(params.offset)
             .limit(params.per_page)
             .all()
         )
@@ -140,7 +141,7 @@ class User(db.Model, ModelMixin, TimestampMixin):
             .filter(cls._mount_q_filter(params.q, cls.name, cls.email))
             .filter(cls.role == role)
             .order_by(cls._mount_ordering(params.sort, params.order))
-            .offset(cls._calculate_offset(params.page, params.per_page))
+            .offset(params.offset)
             .limit(params.per_page)
             .all()
         )

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column as set_mapped_column
 from typing import Self
 
 from app.extensions import db
-from app.types import FindAllParams
+from app.dtos import FindAllParams
 from app.utils import ModelUtils
 
 from .mixin.model_mixin import ModelMixin
@@ -34,7 +34,7 @@ class Product(db.Model, ModelMixin, TimestampMixin):
         return (
             cls.query.filter(cls._mount_q_filter(params.q, cls.name, cls.sku))
             .order_by(cls._mount_ordering(params.sort, params.order))
-            .offset(offset=cls._calculate_offset(params.page, params.per_page))
+            .offset(params.offset)
             .limit(params.per_page)
             .all()
         )
