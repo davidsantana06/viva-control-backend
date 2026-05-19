@@ -103,5 +103,6 @@ class UserDto(TypedDict):
     name: str
     email: str
     role: UserRole
+    is_active: bool
 
 # - - -
