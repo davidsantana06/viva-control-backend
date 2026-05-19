@@ -1,9 +1,8 @@
 from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import AdminDeletionNotAllowed, EmailAlreadyInUse, UserNotFound
-from app.factories import UserFilterFactory
 from app.models import User
 from app.facades import Security
-from app.types import CurrentUser, FindAllParams
+from app.types import FindAllParams, UserFilter
 
 
 class UserService:
@@ -19,13 +18,11 @@ class UserService:
         return user
 
     @staticmethod
-    def find_all(params: FindAllParams, current_user: CurrentUser) -> list[User]:
-        user_filter = UserFilterFactory.build_distributor_filter(current_user)
+    def find_all(params: FindAllParams, user_filter: UserFilter) -> list[User]:
         return User.find_all(params, user_filter)
 
     @staticmethod
-    def find_first(id: int, current_user: CurrentUser) -> User:
-        user_filter = UserFilterFactory.build_distributor_filter(current_user)
+    def find_first(id: int, user_filter: UserFilter) -> User:
         user = User.find_first_by_id(id, user_filter)
 
         if not user:
@@ -34,8 +31,8 @@ class UserService:
         return user
 
     @classmethod
-    def update(cls, id: int, dto: UpdateUserDto, current_user: CurrentUser) -> User:
-        user = cls.find_first(id, current_user)
+    def update(cls, id: int, dto: UpdateUserDto, user_filter: UserFilter) -> User:
+        user = cls.find_first(id, user_filter)
         if dto.get("password"):
             dto["password_hash"] = Security.hash_password(dto.pop("password"))
         user.update(**dto)
@@ -43,8 +40,8 @@ class UserService:
         return user
 
     @classmethod
-    def delete(cls, id: int, current_user: CurrentUser) -> None:
-        user = cls.find_first(id, current_user)
+    def delete(cls, id: int, user_filter: UserFilter) -> None:
+        user = cls.find_first(id, user_filter)
 
         if user.is_admin:
             raise AdminDeletionNotAllowed()

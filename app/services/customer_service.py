@@ -1,15 +1,12 @@
 from app.dtos import CreateCustomerDto, UpdateCustomerDto
 from app.exceptions import CustomerNotFound
-from app.factories import UserFilterFactory
 from app.models import Customer
-from app.types import CurrentUser, UserScopedFindAllParams
-from app.utils import DtoUtils
+from app.types import UserFilter, UserScopedFindAllParams
 
 
 class CustomerService:
     @staticmethod
-    def create(dto: CreateCustomerDto, current_user: CurrentUser) -> Customer:
-        DtoUtils.inject_user_ids(dto, current_user)
+    def create(dto: CreateCustomerDto) -> Customer:
         customer = Customer(**dto)
         Customer.save(customer)
         return customer
@@ -17,17 +14,12 @@ class CustomerService:
     @staticmethod
     def find_all(
         params: UserScopedFindAllParams,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> list[Customer]:
-        user_filter = UserFilterFactory.build_user_filter(
-            current_user,
-            params.user_scoped,
-        )
         return Customer.find_all(params, user_filter)
 
     @staticmethod
-    def find_first(id: int, current_user: CurrentUser) -> Customer:
-        user_filter = UserFilterFactory.build_user_filter(current_user)
+    def find_first(id: int, user_filter: UserFilter) -> Customer:
         customer = Customer.find_first_by_id(id, user_filter)
 
         if not customer:
@@ -40,14 +32,14 @@ class CustomerService:
         cls,
         id: int,
         dto: UpdateCustomerDto,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> Customer:
-        customer = cls.find_first(id, current_user)
+        customer = cls.find_first(id, user_filter)
         customer.update(**dto)
         Customer.save(customer)
         return customer
 
     @classmethod
-    def delete(cls, id: int, current_user: CurrentUser) -> None:
-        customer = cls.find_first(id, current_user)
+    def delete(cls, id: int, user_filter: UserFilter) -> None:
+        customer = cls.find_first(id, user_filter)
         Customer.delete(customer)

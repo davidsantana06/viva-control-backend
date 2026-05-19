@@ -1,10 +1,8 @@
 from app.dtos import CreateDistributorStockDto, UpdateDistributorStockDto
 from app.exceptions import DistributorStockNotFound, DistributorStockAlreadyExists
 from app.extensions import db
-from app.factories import UserFilterFactory
 from app.models import DistributorStock, OrderItem
-from app.types import CurrentUser, FindAllParams
-from app.utils import DtoUtils
+from app.types import FindAllParams, UserFilter
 
 
 class DistributorStockService:
@@ -12,10 +10,7 @@ class DistributorStockService:
     def create(
         cls,
         dto: CreateDistributorStockDto,
-        current_user: CurrentUser,
     ) -> DistributorStock:
-        DtoUtils.inject_user_ids(dto, current_user)
-
         other_stock = DistributorStock.find_first_by_product_and_distributor_ids(
             dto["product_id"],
             dto["distributor_id"],
@@ -31,22 +26,19 @@ class DistributorStockService:
     def find_all(
         cls,
         params: FindAllParams,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> list[DistributorStock]:
-        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all(params, user_filter)
 
     @classmethod
     def find_all_below_minimum(
         cls,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> list[DistributorStock]:
-        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
         return DistributorStock.find_all_below_minimum(user_filter)
 
     @classmethod
-    def find_first(cls, id: int, current_user: CurrentUser) -> DistributorStock:
-        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
+    def find_first(cls, id: int, user_filter: UserFilter) -> DistributorStock:
         stock = DistributorStock.find_first_by_id(id, user_filter)
 
         if not stock:
@@ -59,20 +51,24 @@ class DistributorStockService:
         cls,
         id: int,
         dto: UpdateDistributorStockDto,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> DistributorStock:
-        stock = cls.find_first(id, current_user)
+        stock = cls.find_first(id, user_filter)
         stock.update(**dto)
         DistributorStock.save(stock)
         return stock
 
     @classmethod
-    def delete(cls, id: int, current_user: CurrentUser) -> None:
-        stock = cls.find_first(id, current_user)
+    def delete(cls, id: int, user_filter: UserFilter) -> None:
+        stock = cls.find_first(id, user_filter)
         DistributorStock.delete(stock)
 
     @classmethod
-    def deduct_all_staged(cls, order_items: list[OrderItem], distributor_id: int) -> None:
+    def deduct_all_staged(
+        cls,
+        order_items: list[OrderItem],
+        distributor_id: int,
+    ) -> None:
         for order_item in order_items:
             cls.__deduct_staged(order_item, distributor_id)
 
@@ -90,7 +86,9 @@ class DistributorStockService:
         db.session.add(stock)
 
     @classmethod
-    def restore_all_staged(cls, order_items: list[OrderItem], distributor_id: int) -> None:
+    def restore_all_staged(
+        cls, order_items: list[OrderItem], distributor_id: int
+    ) -> None:
         for order_item in order_items:
             cls.__restore_staged(order_item, distributor_id)
 

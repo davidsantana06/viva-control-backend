@@ -6,10 +6,8 @@ from app.exceptions import (
     OrderStatusTransitionInvalid,
 )
 from app.extensions import db
-from app.factories import UserFilterFactory
 from app.models import Order
-from app.types import CurrentUser, OrderStatus, UserScopedFindAllParams
-from app.utils import DtoUtils
+from app.types import OrderStatus, UserFilter, UserScopedFindAllParams
 
 from .customer_service import CustomerService
 from .distributor_stock_service import DistributorStockService
@@ -29,9 +27,8 @@ class OrderService:
     }
 
     @classmethod
-    def create(cls, dto: CreateOrderDto, current_user: CurrentUser) -> Order:
-        DtoUtils.inject_user_ids(dto, current_user)
-        customer = CustomerService.find_first(dto["customer_id"], current_user)
+    def create(cls, dto: CreateOrderDto, user_filter: UserFilter) -> Order:
+        customer = CustomerService.find_first(dto["customer_id"], user_filter)
 
         du_order = Order.find_first_delivered_unpaid_by_customer_id(customer.id)
         if du_order:
@@ -48,17 +45,12 @@ class OrderService:
     @staticmethod
     def find_all(
         params: UserScopedFindAllParams,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> list[Order]:
-        user_filter = UserFilterFactory.build_user_filter(
-            current_user,
-            params.user_scoped,
-        )
         return Order.find_all(params, user_filter)
 
     @classmethod
-    def find_first(cls, id: int, current_user: CurrentUser) -> Order:
-        user_filter = UserFilterFactory.build_user_filter(current_user)
+    def find_first(cls, id: int, user_filter: UserFilter) -> Order:
         order = Order.find_first_by_id(id, user_filter)
 
         if not order:
@@ -71,9 +63,9 @@ class OrderService:
         cls,
         id: int,
         dto: UpdateOrderStatusDto,
-        current_user: CurrentUser,
+        user_filter: UserFilter,
     ) -> Order:
-        order = cls.find_first(id, current_user)
+        order = cls.find_first(id, user_filter)
 
         current_status = OrderStatus(order.status)
         new_status = OrderStatus(dto["status"])
@@ -91,8 +83,8 @@ class OrderService:
         return order
 
     @classmethod
-    def delete(cls, id: int, current_user: CurrentUser) -> None:
-        order = cls.find_first(id, current_user)
+    def delete(cls, id: int, user_filter: UserFilter) -> None:
+        order = cls.find_first(id, user_filter)
 
         if not order.is_cancelled:
             raise OrderDeletionNotAllowed()

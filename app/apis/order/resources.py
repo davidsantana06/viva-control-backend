@@ -18,9 +18,10 @@ from app.exceptions import (
     OrderStatusTransitionInvalid,
     ProductNotFound,
 )
-from app.factories import FindAllFactory
+from app.factories import FindAllFactory, UserFilterFactory
 from app.services import OrderService
 from app.types import CurrentUser, UserRole
+from app.utils import DtoUtils
 
 from . import order_ns
 from .models import (
@@ -51,7 +52,9 @@ class OrderListResource(Resource):
                 order_ns.payload["payment_due_date"]
             ),
         }
-        return OrderService.create(dto, current_user), HTTPStatus.CREATED
+        DtoUtils.inject_user_ids(dto, current_user)
+        user_filter = UserFilterFactory.build_user_filter(current_user)
+        return OrderService.create(dto, user_filter), HTTPStatus.CREATED
 
     @list_resource(order_ns, __find_all_parser, order_model)
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
@@ -60,7 +63,11 @@ class OrderListResource(Resource):
         find_all_params = FindAllFactory.build_user_scoped_find_all_params(
             self.__find_all_parser,
         )
-        return OrderService.find_all(find_all_params, current_user)
+        user_filter = UserFilterFactory.build_user_filter(
+            current_user,
+            find_all_params.user_scoped,
+        )
+        return OrderService.find_all(find_all_params, user_filter)
 
 
 @order_ns.route("/<int:id>")
@@ -70,13 +77,15 @@ class OrderResource(Resource):
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, current_user: CurrentUser):
         """Get an order by ID"""
-        return OrderService.find_first(id, current_user)
+        user_filter = UserFilterFactory.build_user_filter(current_user)
+        return OrderService.find_first(id, user_filter)
 
     @delete_resource(order_ns, OrderNotFound, OrderDeletionNotAllowed)
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def delete(self, id: int, current_user: CurrentUser):
         """Delete a cancelled order"""
-        OrderService.delete(id, current_user)
+        user_filter = UserFilterFactory.build_user_filter(current_user)
+        OrderService.delete(id, user_filter)
         return "", HTTPStatus.NO_CONTENT
 
 
@@ -93,4 +102,5 @@ class OrderStatusResource(Resource):
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
     def patch(self, id: int, current_user: CurrentUser):
         """Update the status of an order"""
-        return OrderService.update_status(id, order_ns.payload, current_user)
+        user_filter = UserFilterFactory.build_user_filter(current_user)
+        return OrderService.update_status(id, order_ns.payload, user_filter)
