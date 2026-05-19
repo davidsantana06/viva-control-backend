@@ -4,12 +4,16 @@ from http import HTTPStatus
 from app.decorators import (
     auth_required,
     create_resource,
-    delete_resource,
     get_resource,
     list_resource,
+    patch_resource,
     update_resource,
 )
-from app.exceptions import EmailAlreadyRegisteredException, UserNotFoundException
+from app.exceptions import (
+    AdminDisableNotAllowedException,
+    EmailAlreadyRegisteredException,
+    UserNotFoundException,
+)
 from app.factories import FindAllFactory, UserFilterFactory
 from app.services import UserService
 from app.dtos import CurrentUser
@@ -66,10 +70,24 @@ class UserResource(Resource):
         user_filter = UserFilterFactory.build_distributor_filter(current_user)
         return UserService.update(id, user_ns.payload, user_filter)
 
-    @delete_resource(user_ns, UserNotFoundException)
+
+@user_ns.route("/<int:id>/activate")
+@user_ns.param("id", "The user identifier")
+class UserActivateResource(Resource):
+    @patch_resource(user_ns, UserNotFoundException)
     @auth_required(UserRole.ADMIN)
-    def delete(self, id: int, current_user: CurrentUser):
-        """Delete a user by ID"""
-        user_filter = UserFilterFactory.build_distributor_filter(current_user)
-        UserService.delete(id, user_filter)
+    def patch(self, id: int, **_):
+        """Activate a user"""
+        UserService.activate(id)
+        return "", HTTPStatus.NO_CONTENT
+
+
+@user_ns.route("/<int:id>/disable")
+@user_ns.param("id", "The user identifier")
+class UserDisableResource(Resource):
+    @patch_resource(user_ns, UserNotFoundException, AdminDisableNotAllowedException)
+    @auth_required(UserRole.ADMIN)
+    def patch(self, id: int, **_):
+        """Disable a user"""
+        UserService.disable(id)
         return "", HTTPStatus.NO_CONTENT

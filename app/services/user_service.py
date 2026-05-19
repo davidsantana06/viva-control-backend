@@ -1,9 +1,10 @@
 from app.dtos import CreateUserDto, UpdateUserDto
 from app.exceptions import (
-    AdminDeletionNotAllowedException,
+    AdminDisableNotAllowedException,
     EmailAlreadyRegisteredException,
     UserNotFoundException,
 )
+from app.extensions import db
 from app.models import User
 from app.facades import Security
 from app.types import FindAllParams, UserFilter
@@ -48,10 +49,38 @@ class UserService:
         return user
 
     @classmethod
-    def delete(cls, id: int, user_filter: UserFilter) -> None:
-        user = cls.find_first_or_raise(id, user_filter)
+    def disable(cls, id: int) -> None:
+        user = User.find_first_by_id(id, is_active=True)
+
+        if not user:
+            raise UserNotFoundException()
 
         if user.is_admin:
-            raise AdminDeletionNotAllowedException()
+            raise AdminDisableNotAllowedException()
 
-        User.delete(user)
+        if user.is_distributor:
+            cls.__toggle_sellers_activation_staged(user)
+
+        User.toggle_activation(user)
+        db.session.add(user)
+        db.session.commit()
+
+    @classmethod
+    def activate(cls, id: int) -> None:
+        user = User.find_first_by_id(id, is_active=False)
+
+        if not user:
+            raise UserNotFoundException()
+
+        if user.is_distributor:
+            cls.__toggle_sellers_activation_staged(user)
+
+        User.toggle_activation(user)
+        db.session.add(user)
+        db.session.commit()
+
+    @classmethod
+    def __toggle_sellers_activation_staged(cls, user: User) -> None:
+        for seller in user.sellers:
+            User.toggle_activation(seller)
+            db.session.add(seller)

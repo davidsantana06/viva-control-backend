@@ -94,6 +94,17 @@ def update_resource(
     return decorator
 
 
+def patch_resource(ns: Namespace, *exception_classes: type[ApiException]):
+    def decorator(func):
+        func = ns.doc("patch", security="Bearer")(func)
+        func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
+        for exc_class in exception_classes:
+            func = ns.response(*exc_class.get_api_specs())(func)
+        return func
+
+    return decorator
+
+
 def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
     def decorator(func):
         func = ns.doc("delete", security="Bearer")(func)

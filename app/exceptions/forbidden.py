@@ -24,3 +24,11 @@ class OrderDeletionNotAllowedException(ApiException, Forbidden):
         "Cancel the order before attempting to delete it."
     )
     api_description = "non-'PENDING' order deletion not allowed"
+
+
+class AdminDisableNotAllowedException(ApiException, Forbidden):
+    description = (
+        "Administrator accounts cannot be disabled. "
+        "Transfer responsibilities before attempting removal."
+    )
+    api_description = "Admin disable not allowed"
