@@ -28,7 +28,7 @@ class OrderService:
 
     @classmethod
     def create(cls, dto: CreateOrderDto, user_filter: UserFilter) -> Order:
-        customer = CustomerService.find_first(dto["customer_id"], user_filter)
+        customer = CustomerService.find_first_or_raise(dto["customer_id"], user_filter)
 
         du_order = Order.find_first_delivered_unpaid_by_customer_id(customer.id)
         if du_order:
@@ -49,9 +49,13 @@ class OrderService:
     ) -> list[Order]:
         return Order.find_all(params, user_filter)
 
+    @staticmethod
+    def find_first(id: int, user_filter: UserFilter) -> Order | None:
+        return Order.find_first_by_id(id, user_filter)
+
     @classmethod
-    def find_first(cls, id: int, user_filter: UserFilter) -> Order:
-        order = Order.find_first_by_id(id, user_filter)
+    def find_first_or_raise(cls, id: int, user_filter: UserFilter) -> Order:
+        order = cls.find_first(id, user_filter)
 
         if not order:
             raise OrderNotFound()
@@ -65,7 +69,7 @@ class OrderService:
         dto: UpdateOrderStatusDto,
         user_filter: UserFilter,
     ) -> Order:
-        order = cls.find_first(id, user_filter)
+        order = cls.find_first_or_raise(id, user_filter)
 
         current_status = OrderStatus(order.status)
         new_status = OrderStatus(dto["status"])
@@ -84,7 +88,7 @@ class OrderService:
 
     @classmethod
     def delete(cls, id: int, user_filter: UserFilter) -> None:
-        order = cls.find_first(id, user_filter)
+        order = cls.find_first_or_raise(id, user_filter)
 
         if not order.is_cancelled:
             raise OrderDeletionNotAllowed()

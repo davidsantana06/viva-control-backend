@@ -48,7 +48,7 @@ class ProductResource(Resource):
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, **_):
         """Get a product by ID"""
-        return ProductService.find_first(id)
+        return ProductService.find_first_or_raise(id)
 
     @update_resource(
         product_ns,

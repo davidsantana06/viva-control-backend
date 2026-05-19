@@ -78,7 +78,7 @@ class OrderResource(Resource):
     def get(self, id: int, current_user: CurrentUser):
         """Get an order by ID"""
         user_filter = UserFilterFactory.build_user_filter(current_user)
-        return OrderService.find_first(id, user_filter)
+        return OrderService.find_first_or_raise(id, user_filter)
 
     @delete_resource(order_ns, OrderNotFound, OrderDeletionNotAllowed)
     @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)

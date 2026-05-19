@@ -53,7 +53,7 @@ class CustomerResource(Resource):
     def get(self, id: int, current_user: CurrentUser):
         """Get a customer by ID"""
         user_filter = UserFilterFactory.build_user_filter(current_user)
-        return CustomerService.find_first(id, user_filter)
+        return CustomerService.find_first_or_raise(id, user_filter)
 
     @update_resource(
         customer_ns,

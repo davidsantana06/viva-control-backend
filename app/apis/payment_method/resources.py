@@ -54,7 +54,7 @@ class PaymentMethodResource(Resource):
     @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR, UserRole.SELLER)
     def get(self, id: int, **_):
         """Get a payment method by ID"""
-        return PaymentMethodService.find_first(id)
+        return PaymentMethodService.find_first_or_raise(id)
 
     @update_resource(
         payment_method_ns,

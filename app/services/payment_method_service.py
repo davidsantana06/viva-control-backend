@@ -16,8 +16,12 @@ class PaymentMethodService:
         return PaymentMethod.find_all(params)
 
     @staticmethod
-    def find_first(id: int) -> PaymentMethod:
-        payment_method = PaymentMethod.find_first_by_id(id)
+    def find_first(id: int) -> PaymentMethod | None:
+        return PaymentMethod.find_first_by_id(id)
+
+    @classmethod
+    def find_first_or_raise(cls, id: int) -> PaymentMethod:
+        payment_method = cls.find_first(id)
 
         if not payment_method:
             raise PaymentMethodNotFound()
@@ -26,12 +30,12 @@ class PaymentMethodService:
 
     @classmethod
     def update(cls, id: int, dto: UpdatePaymentMethodDto) -> PaymentMethod:
-        payment_method = cls.find_first(id)
+        payment_method = cls.find_first_or_raise(id)
         payment_method.update(**dto)
         PaymentMethod.save(payment_method)
         return payment_method
 
     @classmethod
     def delete(cls, id: int) -> None:
-        payment_method = cls.find_first(id)
+        payment_method = cls.find_first_or_raise(id)
         PaymentMethod.delete(payment_method)

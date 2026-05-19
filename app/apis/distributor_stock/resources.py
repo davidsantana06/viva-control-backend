@@ -72,7 +72,7 @@ class DistributorStockResource(Resource):
     def get(self, id: int, current_user: CurrentUser):
         """Get a stock entry by ID"""
         user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
-        return DistributorStockService.find_first(id, user_filter)
+        return DistributorStockService.find_first_or_raise(id, user_filter)
 
     @update_resource(
         distributor_stock_ns,

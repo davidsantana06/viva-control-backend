@@ -19,8 +19,12 @@ class CustomerService:
         return Customer.find_all(params, user_filter)
 
     @staticmethod
-    def find_first(id: int, user_filter: UserFilter) -> Customer:
-        customer = Customer.find_first_by_id(id, user_filter)
+    def find_first(id: int, user_filter: UserFilter) -> Customer | None:
+        return Customer.find_first_by_id(id, user_filter)
+
+    @classmethod
+    def find_first_or_raise(cls, id: int, user_filter: UserFilter) -> Customer:
+        customer = cls.find_first(id, user_filter)
 
         if not customer:
             raise CustomerNotFound()
@@ -34,12 +38,12 @@ class CustomerService:
         dto: UpdateCustomerDto,
         user_filter: UserFilter,
     ) -> Customer:
-        customer = cls.find_first(id, user_filter)
+        customer = cls.find_first_or_raise(id, user_filter)
         customer.update(**dto)
         Customer.save(customer)
         return customer
 
     @classmethod
     def delete(cls, id: int, user_filter: UserFilter) -> None:
-        customer = cls.find_first(id, user_filter)
+        customer = cls.find_first_or_raise(id, user_filter)
         Customer.delete(customer)

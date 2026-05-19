@@ -22,8 +22,12 @@ class UserService:
         return User.find_all(params, user_filter)
 
     @staticmethod
-    def find_first(id: int, user_filter: UserFilter) -> User:
-        user = User.find_first_by_id(id, user_filter)
+    def find_first(id: int, user_filter: UserFilter) -> User | None:
+        return User.find_first_by_id(id, user_filter)
+
+    @classmethod
+    def find_first_or_raise(cls, id: int, user_filter: UserFilter) -> User:
+        user = cls.find_first(id, user_filter)
 
         if not user:
             raise UserNotFound()
@@ -32,7 +36,7 @@ class UserService:
 
     @classmethod
     def update(cls, id: int, dto: UpdateUserDto, user_filter: UserFilter) -> User:
-        user = cls.find_first(id, user_filter)
+        user = cls.find_first_or_raise(id, user_filter)
         if dto.get("password"):
             dto["password_hash"] = Security.hash_password(dto.pop("password"))
         user.update(**dto)
@@ -41,7 +45,7 @@ class UserService:
 
     @classmethod
     def delete(cls, id: int, user_filter: UserFilter) -> None:
-        user = cls.find_first(id, user_filter)
+        user = cls.find_first_or_raise(id, user_filter)
 
         if user.is_admin:
             raise AdminDeletionNotAllowed()

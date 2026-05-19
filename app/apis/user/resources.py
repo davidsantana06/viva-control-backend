@@ -50,7 +50,7 @@ class UserResource(Resource):
     def get(self, id: int, current_user: CurrentUser):
         """Get a user by ID"""
         user_filter = UserFilterFactory.build_distributor_filter(current_user)
-        return UserService.find_first(id, user_filter)
+        return UserService.find_first_or_raise(id, user_filter)
 
     @update_resource(
         user_ns,

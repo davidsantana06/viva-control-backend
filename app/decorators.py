@@ -94,7 +94,7 @@ def update_resource(
 
 def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
     def decorator(func):
-        func = ns.doc("deactivate", security="Bearer")(func)
+        func = ns.doc("delete", security="Bearer")(func)
         func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_specs())(func)

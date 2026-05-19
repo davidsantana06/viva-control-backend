@@ -20,8 +20,12 @@ class ProductService:
         return Product.find_all(params)
 
     @staticmethod
-    def find_first(id: int) -> Product:
-        product = Product.find_first_by_id(id)
+    def find_first(id: int) -> Product | None:
+        return Product.find_first_by_id(id)
+
+    @classmethod
+    def find_first_or_raise(cls, id: int) -> Product:
+        product = cls.find_first(id)
 
         if not product:
             raise ProductNotFound()
@@ -30,7 +34,7 @@ class ProductService:
 
     @classmethod
     def update(cls, id: int, dto: UpdateProductDto) -> Product:
-        product = cls.find_first(id)
+        product = cls.find_first_or_raise(id)
 
         sku_is_different = dto["sku"] != product.sku
         other_product = sku_is_different and Product.find_first_by_sku(dto["sku"])
@@ -43,5 +47,5 @@ class ProductService:
 
     @classmethod
     def delete(cls, id: int) -> None:
-        product = cls.find_first(id)
+        product = cls.find_first_or_raise(id)
         Product.delete(product)

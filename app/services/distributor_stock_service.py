@@ -37,9 +37,13 @@ class DistributorStockService:
     ) -> list[DistributorStock]:
         return DistributorStock.find_all_below_minimum(user_filter)
 
+    @staticmethod
+    def find_first(id: int, user_filter: UserFilter) -> DistributorStock | None:
+        return DistributorStock.find_first_by_id(id, user_filter)
+
     @classmethod
-    def find_first(cls, id: int, user_filter: UserFilter) -> DistributorStock:
-        stock = DistributorStock.find_first_by_id(id, user_filter)
+    def find_first_or_raise(cls, id: int, user_filter: UserFilter) -> DistributorStock:
+        stock = cls.find_first(id, user_filter)
 
         if not stock:
             raise DistributorStockNotFound()
@@ -53,14 +57,14 @@ class DistributorStockService:
         dto: UpdateDistributorStockDto,
         user_filter: UserFilter,
     ) -> DistributorStock:
-        stock = cls.find_first(id, user_filter)
+        stock = cls.find_first_or_raise(id, user_filter)
         stock.update(**dto)
         DistributorStock.save(stock)
         return stock
 
     @classmethod
     def delete(cls, id: int, user_filter: UserFilter) -> None:
-        stock = cls.find_first(id, user_filter)
+        stock = cls.find_first_or_raise(id, user_filter)
         DistributorStock.delete(stock)
 
     @classmethod
