@@ -14,8 +14,8 @@
 | Tecnologia         | Descrição                                                                                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Flask              | Microframework web em Python. Provê o servidor HTTP, roteamento e o ciclo de vida da aplicação.                                                                     |
-| Flask-RESTX        | Extensão do Flask para construção de APIs REST. Adiciona organização por Namespaces, validação de payload e geração automática de documentação via Swagger UI.      |
-| Swagger UI         | Interface gráfica para documentação interativa e teste da API REST. Gerada automaticamente pelo Flask-RESTX a partir dos Namespaces e Resources, disponível em `/`. |
+| Flask-RESTX        | Extensão do Flask para construção de APIs REST. Adiciona organização por namespaces, validação de payload e geração automática de documentação via Swagger UI.      |
+| Swagger UI         | Interface gráfica para documentação interativa e teste da API REST. Gerada automaticamente pelo Flask-RESTX a partir dos namespaces e resources, disponível em `/`. |
 | Flask-SQLAlchemy   | Integração entre Flask e SQLAlchemy. Gerencia a sessão do banco de dados e o ciclo de vida da conexão dentro do contexto da aplicação.                              |
 | SQLAlchemy         | ORM e toolkit SQL em Python. Mapeia classes Python a tabelas relacionais e gerencia transações.                                                                     |
 | Flask-Migrate      | Controle de versão do esquema do banco de dados via Alembic. Gera e aplica scripts de migração a partir das alterações nos modelos.                                 |
@@ -23,10 +23,11 @@
 | Flask-CORS         | Gerenciamento de Cross-Origin Resource Sharing. Controla quais origens têm permissão para consumir a API.                                                           |
 | SQLite             | Banco de dados relacional embutido, sem necessidade de servidor. Utilizado no ambiente de desenvolvimento pelo custo zero de infraestrutura.                        |
 | PostgreSQL         | Banco de dados relacional com suporte completo a transações ACID e controle de concorrência por linha. Escolha para o ambiente de produção.                         |
+| pytest             | Framework de testes para Python. Suporta fixtures, parametrização e integração com `unittest.mock` para isolamento da lógica de negócio.                            |
 
 ## 🛠️ Instalação e Execução
 
-Desenvolvido em **Python 3.12**, recomenda-se o uso dessa versão para garantir compatibilidade. A seguir, os passos para configuração e execução a partir do diretório raiz:
+Desenvolvido em **Python 3.14**, recomenda-se o uso dessa versão para garantir compatibilidade. A seguir, os passos para configuração e execução a partir do diretório raiz:
 
 ### 1️⃣ Criar e Ativar o Ambiente Virtual
 
@@ -60,13 +61,15 @@ Copie o arquivo `.env.example` para `.env` na raiz do projeto e preencha as vari
 cp .env.example .env
 ```
 
-| Variável         | Descrição                                                                                                      |
-| ---------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ADMIN_EMAIL`    | E-mail do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.        |
-| `ADMIN_PASSWORD` | Senha do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.         |
-| `ALLOWED_HOSTS`  | Origens permitidas pelo CORS, separadas por espaço (ex.: `http://localhost:5173`). Use `*` em desenvolvimento. |
-| `DATABASE_URI`   | URI de conexão com o banco (ex.: `sqlite:///database.sqlite3` ou `postgresql://user:password@host/db`).        |
-| `JWT_SECRET_KEY` | Chave secreta para assinar os tokens JWT. Deve ser uma string longa e aleatória em produção.                   |
+| Variável                                 | Descrição                                                                                                      |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `ADMIN_EMAIL`                            | E-mail do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.        |
+| `ADMIN_PASSWORD`                         | Senha do usuário administrador criado automaticamente na primeira inicialização, se ainda não existir.         |
+| `ALLOWED_HOSTS`                          | Origens permitidas pelo CORS, separadas por espaço (ex.: `http://localhost:5173`). Use `*` em desenvolvimento. |
+| `DATABASE_URI`                           | URI de conexão com o banco (ex.: `sqlite:///database.sqlite3` ou `postgresql://user:password@host/db`).        |
+| `JWT_SECRET_KEY`                         | Chave secreta para assinar os tokens JWT. Deve ser uma string longa e aleatória em produção.                   |
+| `JWT_ACCESS_TOKEN_EXPIRATION_IN_MINUTES` | Duração em minutos do token de acesso JWT. Padrão: `15`.                                                       |
+| `JWT_REFRESH_TOKEN_EXPIRATION_IN_DAYS`   | Duração em dias do token de atualização JWT. Padrão: `30`.                                                     |
 
 ### 4️⃣ Aplicar Migrações
 
@@ -82,6 +85,14 @@ flask run
 
 A documentação Swagger da API estará disponível em `http://localhost:5000/`.
 
+## 🧪 Cobertura de Testes
+
+A suíte cobre a camada de serviços (`app/services/`) com testes unitários. A lógica de negócio é isolada via `unittest.mock` — dependências externas como banco de dados e servidor HTTP são substituídas por mocks. Para executar, utilize o comando:
+
+```bash
+pytest tests/ --verbose
+```
+
 ## 📐 Princípios do Projeto
 
 O backend adota os princípios da Clean Architecture como guia de organização, com separação explícita entre as camadas e dependências fluindo de fora para dentro: a camada de APIs depende de serviços; serviços dependem de modelos; modelos não dependem de nenhuma camada superior.
@@ -91,16 +102,16 @@ O backend adota os princípios da Clean Architecture como guia de organização,
   <img src="./static/img/the-clean-architecture-cone.png" alt="The Clean Architecture Cone" width="500" />
 </p>
 
-| Camada               | Diretório(s)                               |
-| -------------------- | ------------------------------------------ |
-| Entities             | `models/`                                  |
-| Use Cases            | `services/`                                |
-| Interface Adapters   | `dtos/`, `apis/`, `facades/`, `factories/` |
-| Frameworks & Drivers | `config/`, `exceptions/`, `utils/`         |
+| Camada               | Diretório(s)                                                                  |
+| -------------------- | ----------------------------------------------------------------------------- |
+| Entities             | `app/models/`                                                                 |
+| Use Cases            | `app/services/`, `app/dtos/`                                                  |
+| Interface Adapters   | `app/dtos/`, `app/apis/`, `app/facades/`, `app/factories/`, `app/exceptions/` |
+| Frameworks & Drivers | `app/config/`, `app/utils/`                                                   |
 
-A implementação é orientada a objetos com métodos predominantemente estáticos e de classe: os serviços encapsulam a lógica de negócio em classes sem estado de instância, enquanto os modelos utilizam mixins para compartilhar comportamento comum — chave primária, persistência, timestamps e inativação lógica — sem herança profunda.
+A implementação é orientada a objetos com métodos predominantemente estáticos e de classe: os serviços encapsulam a lógica de negócio em classes sem estado de instância, com uso de mixins e classes base para compartilhar comportamento comum entre camadas, sem herança profunda.
 
-O controle de acesso (RBAC) com três perfis — `ADMIN`, `DISTRIBUTOR` e `SELLER` — é aplicado e validado integralmente no backend. Registros não são excluídos fisicamente: a remoção é feita por inativação (`is_active = FALSE`), preservando o histórico e os vínculos com pedidos e cobranças.
+O controle de acesso (RBAC) com três perfis — `ADMIN`, `DISTRIBUTOR` e `SELLER` — é aplicado e validado integralmente no backend. Usuários não são excluídos fisicamente: a remoção é feita por inativação (`is_active = FALSE`), preservando o histórico e os vínculos com pedidos.
 
 ## 🗂️ Estruturação
 
@@ -125,10 +136,13 @@ viva-control-backend/
 │   ├── models/
 │   │   └── mixin/
 │   ├── services/
+│   │   └── base/
 │   └── utils/
+├── docs/
 ├── fixtures/
 ├── migrations/
-└── static/
+├── static/
+└── tests/
 ```
 
 ### 📁 `app/`
@@ -137,7 +151,7 @@ Código-fonte principal.
 
 #### 📁 `apis/`
 
-Camada de **apresentação** — Namespaces e Resources do Flask-RESTX. Cada subpacote organiza um Namespace em dois módulos: `models.py` (modelos Flask-RESTX expostos ao Swagger) e `resources.py` (Resources com as rotas e os decorators de validação, documentação e proteção JWT). Não contém lógica de negócio: delega toda operação ao serviço correspondente.
+Camada de **interface adapters** (adaptadores de interface) — namespaces e resources do Flask-RESTX. Cada subpacote organiza um namespace em `models.py` (modelos Flask-RESTX expostos ao Swagger) e um ou mais módulos `resources.py` (resources com as rotas e os decorators de validação, documentação e proteção JWT). Namespaces com múltiplos perfis, como `user/`, subdividem os resources em subpacotes por perfil. Não contém lógica de negócio: delega toda operação ao serviço correspondente.
 
 #### 📁 `config/`
 
@@ -145,11 +159,11 @@ Configuração e inicialização da aplicação:
 
 - 📄 `paths.py` — Constantes de caminhos do sistema de arquivos.
 - 📄 `environs.py` — Variáveis de ambiente lidas via `os.environ`, com valores padrão para desenvolvimento.
-- 📄 `setup.py` — Inicializa as extensões Flask (banco de dados, migrações, JWT, API e CORS) e semeia o banco com os dados iniciais.
+- 📄 `setup.py` — Inicializa as extensões Flask e semeia o banco com os dados iniciais.
 
 #### 📁 `dtos/`
 
-Data Transfer Objects — `TypedDict`s que tipam os payloads de entrada e saída.
+Estruturas de dados que tipam os payloads trafegados entre camadas: entradas e saídas da API (`input.py`, `output.py`) e objetos de comunicação interna entre serviços e adaptadores (`internal.py`).
 
 #### 📁 `exceptions/`
 
@@ -165,15 +179,19 @@ Classes de fábrica que produzem objetos reutilizáveis a partir dos parâmetros
 
 #### 📁 `models/`
 
-Camada de **persistência** — modelos SQLAlchemy.
+Camada de **entities** (entidades) — modelos SQLAlchemy.
 
 #### 📁 `services/`
 
-Camada de **lógica de negócio** — módulos de funções procedurais que operam sobre os modelos e orquestram as regras de cada domínio.
+Camada de **use cases** (casos de uso) — classes com métodos estáticos e de classe que encapsulam as regras de cada domínio e operam sobre os modelos. O subpacote `base/` define a classe abstrata `UserService`, compartilhada pelos serviços de usuário com perfis distintos.
 
 #### 📁 `utils/`
 
-Utilitários transversais sem vínculo com um domínio específico:
+Utilitários transversais sem vínculo com um domínio específico.
+
+### 📁 `docs/`
+
+Documentação técnica do projeto: modelo de dados, visão do produto e outras especificações.
 
 ### 📁 `fixtures/`
 
@@ -186,6 +204,10 @@ Gerenciado pelo Flask-Migrate, armazena os scripts de migração do banco no dir
 ### 📁 `static/`
 
 Ativos estáticos do projeto.
+
+### 📁 `tests/`
+
+Suíte de testes automatizados.
 
 ## 📚 Referências
 
