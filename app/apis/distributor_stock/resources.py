@@ -94,10 +94,10 @@ class DistributorStockResource(Resource):
             user_filter,
         )
 
-    # @delete_resource(distributor_stock_ns, DistributorStockNotFoundException)
-    # @auth_required(UserRole.DISTRIBUTOR)
-    # def delete(self, id: int, current_user: CurrentUser):
-    #     """Delete a stock entry by ID"""
-    #     user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
-    #     DistributorStockService.delete(id, user_filter)
-    #     return "", HTTPStatus.NO_CONTENT
+    @delete_resource(distributor_stock_ns, DistributorStockNotFoundException)
+    @auth_required(UserRole.ADMIN, UserRole.DISTRIBUTOR)
+    def delete(self, id: int, current_user: CurrentUser):
+        """Delete a stock entry by ID"""
+        user_filter = UserFilterFactory.build_strict_distributor_filter(current_user)
+        DistributorStockService.delete(id, user_filter)
+        return "", HTTPStatus.NO_CONTENT
