@@ -89,31 +89,23 @@ def update_resource(
     return decorator
 
 
-def activate_resource(ns: Namespace, *exception_classes: type[ApiException]):
+def _no_content_resource(shortcut: str, ns: Namespace, *exception_classes: type[ApiException]):
     def decorator(func):
-        func = ns.doc("activate", security="Bearer")(func)
+        func = ns.doc(shortcut, security="Bearer")(func)
         func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
         for exc_class in exception_classes:
             func = ns.response(*exc_class.get_api_specs())(func)
         return func
     return decorator
+
+
+def activate_resource(ns: Namespace, *exception_classes: type[ApiException]):
+    return _no_content_resource("activate", ns, *exception_classes)
 
 
 def deactivate_resource(ns: Namespace, *exception_classes: type[ApiException]):
-    def decorator(func):
-        func = ns.doc("deactivate", security="Bearer")(func)
-        func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
-        for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_api_specs())(func)
-        return func
-    return decorator
+    return _no_content_resource("deactivate", ns, *exception_classes)
 
 
 def delete_resource(ns: Namespace, *exception_classes: type[ApiException]):
-    def decorator(func):
-        func = ns.doc("delete", security="Bearer")(func)
-        func = ns.response(HTTPStatus.NO_CONTENT, "Success")(func)
-        for exc_class in exception_classes:
-            func = ns.response(*exc_class.get_api_specs())(func)
-        return func
-    return decorator
+    return _no_content_resource("delete", ns, *exception_classes)

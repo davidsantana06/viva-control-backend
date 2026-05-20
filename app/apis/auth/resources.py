@@ -1,6 +1,5 @@
 from flask_restx import Resource
 
-from app.dtos import AccessTokenDto
 from app.exceptions import (
     InvalidCredentialsException,
     InvalidPayloadException,

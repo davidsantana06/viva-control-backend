@@ -68,10 +68,10 @@ class CustomerResource(Resource):
         user_filter = UserFilterFactory.build_user_filter(current_user)
         return CustomerService.update(id, customer_ns.payload, user_filter)
 
-    # @delete_resource(customer_ns, CustomerNotFoundException)
-    # @auth_required(UserRole.DISTRIBUTOR, UserRole.SELLER)
-    # def delete(self, id: int, current_user: CurrentUser):
-    #     """Delete a customer by ID"""
-    #     user_filter = UserFilterFactory.build_user_filter(current_user)
-    #     CustomerService.delete(id, user_filter)
-    #     return "", HTTPStatus.NO_CONTENT
+    @delete_resource(customer_ns, CustomerNotFoundException)
+    @auth_required(UserRole.ADMIN)
+    def delete(self, id: int, current_user: CurrentUser):
+        """Delete a customer by ID"""
+        user_filter = UserFilterFactory.build_user_filter(current_user)
+        CustomerService.delete(id, user_filter)
+        return "", HTTPStatus.NO_CONTENT

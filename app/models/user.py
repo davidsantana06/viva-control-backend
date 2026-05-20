@@ -106,10 +106,11 @@ class User(db.Model, ModelMixin, TimestampMixin):
 
     @classmethod
     def find_first_by_email(cls, email: str) -> Self | None:
-        return cls.query.filter(
-            cls.email == email,
-            cls.is_active.is_(True),
-        ).first()
+        return (
+            cls.query
+            .filter(cls.email == email, cls.is_active.is_(True))
+            .first()
+        )
 
     @classmethod
     def find_all(
