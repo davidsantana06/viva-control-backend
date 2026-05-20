@@ -8,7 +8,7 @@
 
 | Entidade | Cardinalidade | Entidade | Observação                                                                                                         |
 | :------- | :-----------: | :------- | :----------------------------------------------------------------------------------------------------------------- |
-| `users`  |  0..1 : 0..N  | `users`  | Um usuário pode ter vários subordinados diretos; o nó raiz não tem distribuidor superior (`distributor_id` = NULL) |
+| `users`  |  0..1 : 0..N  | `users`  | Um usuário pode ter vários subordinados diretos; o nó raiz não tem distribuidor superior (`distributor_id = NULL`) |
 
 ### Cadastros
 
@@ -36,48 +36,47 @@
 
 ### 2.1. users
 
-| Column         | Type         | Constraints                  | Descrição                                                                                               |
-| :------------- | :----------- | :--------------------------- | :------------------------------------------------------------------------------------------------------ |
-| id             | INTEGER      | PK, Not Null, Auto-increment | Identificador único                                                                                     |
-| distributor_id | INTEGER      | FK(users.id), Nullable       | Distribuidor ao qual o usuário está vinculado; NULL para ADMIN e DISTRIBUTOR                            |
-| name           | VARCHAR(50)  | Not Null                     | Nome completo do usuário                                                                                |
-| email          | VARCHAR(255) | Unique, Not Null             | E-mail de acesso ao sistema; usado como login                                                           |
-| password_hash  | CHAR(60)     | Not Null                     | Hash bcrypt da senha (custo mínimo 10, saída sempre com 60 caracteres); nunca armazenada em texto plano |
-| role           | VARCHAR(11)  | Not Null                     | Perfil do usuário: `ADMIN`, `DISTRIBUTOR` ou `SELLER`                                                   |
-| is_active      | BOOLEAN      | Not Null, Default TRUE       | Permite inativar o usuário sem excluir o registro e o histórico vinculado a ele                         |
-| created_at     | TIMESTAMP    | Not Null, Default NOW()      | Data de criação                                                                                         |
-| updated_at     | TIMESTAMP    | Not Null, Default NOW()      | Data da última atualização                                                                              |
+| Column         | Type           | Constraints                  | Descrição                                                                       |
+| :------------- | :------------- | :--------------------------- | :------------------------------------------------------------------------------ |
+| id             | `INTEGER`      | PK, Not Null, Auto-increment | Identificador único                                                             |
+| distributor_id | `INTEGER`      | FK(users.id), Nullable       | Distribuidor ao qual o usuário está vinculado; `NULL` para ADMIN e DISTRIBUTOR  |
+| name           | `VARCHAR(50)`  | Not Null                     | Nome completo do usuário                                                        |
+| email          | `VARCHAR(255)` | Unique, Not Null             | E-mail de acesso ao sistema; usado como login                                   |
+| password_hash  | `CHAR(60)`     | Not Null                     | Hash scrypt da senha; nunca armazenada em texto plano                           |
+| role           | `VARCHAR(11)`  | Not Null                     | Perfil do usuário: `ADMIN`, `DISTRIBUTOR` ou `SELLER`                           |
+| is_active      | `BOOLEAN`      | Not Null, Default TRUE       | Permite inativar o usuário sem excluir o registro e o histórico vinculado a ele |
+| created_at     | `TIMESTAMP`    | Not Null, Default `NOW()`    | Data de criação                                                                 |
+| updated_at     | `TIMESTAMP`    | Not Null, Default `NOW()`    | Data da última atualização                                                      |
 
 > **FK:** `users.distributor_id` → `users.id`  
 > **CHECK:** `role IN ('ADMIN', 'DISTRIBUTOR', 'SELLER')`  
-> Quando `role = 'SELLER'`, `distributor_id` deve ser NOT NULL e apontar para o distribuidor responsável. Quando `role = 'DISTRIBUTOR'`, `distributor_id` é NULL. Quando `role = 'ADMIN'`, `distributor_id` é NULL; o registro é criado automaticamente na primeira inicialização do sistema com as credenciais definidas nas variáveis de ambiente `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
+> Quando `role = 'SELLER'`, `distributor_id` deve ser `NOT NULL` e apontar para o distribuidor responsável. Quando `role = 'DISTRIBUTOR'`, `distributor_id` é `NULL`. Quando `role = 'ADMIN'`, `distributor_id` é `NULL`; o registro é criado automaticamente na primeira inicialização do sistema com as credenciais definidas nas variáveis de ambiente `ADMIN_EMAIL` e `ADMIN_PASSWORD`.
 
 ### 2.2. products
 
-| Column          | Type          | Constraints                  | Descrição                                                                              |
-| :-------------- | :------------ | :--------------------------- | :------------------------------------------------------------------------------------- |
-| id              | INTEGER       | PK, Not Null, Auto-increment | Identificador único                                                                    |
-| name            | VARCHAR(100)  | Not Null                     | Nome do produto                                                                        |
-| sku             | VARCHAR(50)   | Unique, Not Null             | Código SKU do produto                                                                  |
-| description     | TEXT          | Nullable                     | Descrição detalhada do produto                                                         |
-| suggested_price | DECIMAL(15,2) | Not Null                     | Preço sugerido de venda; pode ser substituído pelo usuário no momento do pedido        |
-| is_active       | BOOLEAN       | Not Null, Default TRUE       | Produtos inativos não aparecem nas listagens nem podem ser adicionados a novos pedidos |
-| created_at      | TIMESTAMP     | Not Null, Default NOW()      | Data de criação                                                                        |
-| updated_at      | TIMESTAMP     | Not Null, Default NOW()      | Data da última atualização                                                             |
+| Column          | Type            | Constraints                  | Descrição                                                                       |
+| :-------------- | :-------------- | :--------------------------- | :------------------------------------------------------------------------------ |
+| id              | `INTEGER`       | PK, Not Null, Auto-increment | Identificador único                                                             |
+| name            | `VARCHAR(100)`  | Not Null                     | Nome do produto                                                                 |
+| sku             | `VARCHAR(50)`   | Unique, Not Null             | Código SKU do produto                                                           |
+| description     | `TEXT`          | Nullable                     | Descrição detalhada do produto                                                  |
+| suggested_price | `DECIMAL(15,2)` | Not Null                     | Preço sugerido de venda; pode ser substituído pelo usuário no momento do pedido |
+| created_at      | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data de criação                                                                 |
+| updated_at      | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data da última atualização                                                      |
 
 > Produto é cadastrado globalmente — sem vínculo direto com distribuidor. Estoque e estoque mínimo são controlados por distribuidor na tabela `distributor_stocks`. O preço sugerido pode ser ajustado pelo usuário no momento da venda; o valor efetivamente aplicado é gravado em `order_items.unit_price` e não muda retroativamente.
 
 ### 2.3. distributor_stocks
 
-| Column           | Type          | Constraints                  | Descrição                                                                                 |
-| :--------------- | :------------ | :--------------------------- | :---------------------------------------------------------------------------------------- |
-| id               | INTEGER       | PK, Not Null, Auto-increment | Identificador único                                                                       |
-| product_id       | INTEGER       | FK(products.id), Not Null    | Produto ao qual o registro de estoque se refere                                           |
-| distributor_id   | INTEGER       | FK(users.id), Not Null       | Distribuidor proprietário do estoque                                                      |
-| current_quantity | DECIMAL(15,4) | Not Null, Default 0          | Quantidade atual em estoque; decrementada na criação do pedido e restaurada ao cancelar   |
-| minimum_quantity | DECIMAL(15,4) | Not Null, Default 0          | Quantidade mínima configurada; dispara alerta quando `current_quantity` atinge esse valor |
-| created_at       | TIMESTAMP     | Not Null, Default NOW()      | Data de criação                                                                           |
-| updated_at       | TIMESTAMP     | Not Null, Default NOW()      | Data da última atualização                                                                |
+| Column           | Type            | Constraints                  | Descrição                                                                                 |
+| :--------------- | :-------------- | :--------------------------- | :---------------------------------------------------------------------------------------- |
+| id               | `INTEGER`       | PK, Not Null, Auto-increment | Identificador único                                                                       |
+| product_id       | `INTEGER`       | FK(products.id), Not Null    | Produto ao qual o registro de estoque se refere                                           |
+| distributor_id   | `INTEGER`       | FK(users.id), Not Null       | Distribuidor proprietário do estoque                                                      |
+| current_quantity | `DECIMAL(15,4)` | Not Null, Default 0          | Quantidade atual em estoque; decrementada na criação do pedido e restaurada ao cancelar   |
+| minimum_quantity | `DECIMAL(15,4)` | Not Null, Default 0          | Quantidade mínima configurada; dispara alerta quando `current_quantity` atinge esse valor |
+| created_at       | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data de criação                                                                           |
+| updated_at       | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data da última atualização                                                                |
 
 > **FK:** `distributor_stocks.product_id` → `products.id`  
 > **FK:** `distributor_stocks.distributor_id` → `users.id`  
@@ -86,54 +85,51 @@
 
 ### 2.4. customers
 
-| Column         | Type        | Constraints                  | Descrição                                                                       |
-| :------------- | :---------- | :--------------------------- | :------------------------------------------------------------------------------ |
-| id             | INTEGER     | PK, Not Null, Auto-increment | Identificador único                                                             |
-| distributor_id | INTEGER     | FK(users.id), Not Null       | Distribuidor ao qual o cliente pertence; define o escopo de isolamento          |
-| seller_id      | INTEGER     | FK(users.id), Nullable       | Vendedor responsável; define a visibilidade do cliente para o SELLER            |
-| name           | VARCHAR(50) | Not Null                     | Nome ou razão social do cliente                                                 |
-| document       | VARCHAR(14) | Not Null                     | CPF ou CNPJ sem caracteres especiais (máximo 14 dígitos para CNPJ)              |
-| document_type  | VARCHAR(4)  | Not Null                     | Tipo do documento: `CPF` ou `CNPJ`                                              |
-| phone          | VARCHAR(14) | Nullable                     | Telefone sem caracteres especiais (máximo 14 dígitos)                           |
-| address        | TEXT        | Nullable                     | Endereço completo                                                               |
-| birth_date     | DATE        | Nullable                     | Data de nascimento; opcional, aplica-se principalmente a clientes pessoa física |
-| notes          | TEXT        | Nullable                     | Observação livre sobre o cliente                                                |
-| is_active      | BOOLEAN     | Not Null, Default TRUE       | Clientes inativos não aparecem nas listagens nem podem receber novos pedidos    |
-| created_at     | TIMESTAMP   | Not Null, Default NOW()      | Data de criação                                                                 |
-| updated_at     | TIMESTAMP   | Not Null, Default NOW()      | Data da última atualização                                                      |
+| Column         | Type          | Constraints                  | Descrição                                                                       |
+| :------------- | :------------ | :--------------------------- | :------------------------------------------------------------------------------ |
+| id             | `INTEGER`     | PK, Not Null, Auto-increment | Identificador único                                                             |
+| distributor_id | `INTEGER`     | FK(users.id), Not Null       | Distribuidor ao qual o cliente pertence; define o escopo de isolamento          |
+| seller_id      | `INTEGER`     | FK(users.id), Nullable       | Vendedor responsável; define a visibilidade do cliente para o SELLER            |
+| name           | `VARCHAR(50)` | Not Null                     | Nome ou razão social do cliente                                                 |
+| document       | `VARCHAR(14)` | Not Null                     | CPF ou CNPJ sem caracteres especiais (máximo 14 dígitos para CNPJ)              |
+| document_type  | `VARCHAR(4)`  | Not Null                     | Tipo do documento: `CPF` ou `CNPJ`                                              |
+| phone          | `VARCHAR(14)` | Nullable                     | Telefone sem caracteres especiais (máximo 14 dígitos)                           |
+| address        | `TEXT`        | Nullable                     | Endereço completo                                                               |
+| birth_date     | `DATE`        | Nullable                     | Data de nascimento; opcional, aplica-se principalmente a clientes pessoa física |
+| notes          | `TEXT`        | Nullable                     | Observação livre sobre o cliente                                                |
+| created_at     | `TIMESTAMP`   | Not Null, Default `NOW()`    | Data de criação                                                                 |
+| updated_at     | `TIMESTAMP`   | Not Null, Default `NOW()`    | Data da última atualização                                                      |
 
 > **FK:** `customers.distributor_id` → `users.id`  
 > **FK:** `customers.seller_id` → `users.id`  
 > **CHECK:** `document_type IN ('CPF', 'CNPJ')`  
-> Quando o SELLER cadastra um cliente, o sistema preenche `seller_id` automaticamente com o id do usuário logado e `distributor_id` com o distribuidor do vendedor. Quando o DISTRIBUTOR cadastra um cliente, pode definir qualquer vendedor ativo ou deixar `seller_id` NULL. O DISTRIBUTOR visualiza todos os clientes do seu escopo; o SELLER visualiza apenas os clientes onde `seller_id` corresponde ao seu `id`.
+> Quando o SELLER cadastra um cliente, o sistema preenche `seller_id` automaticamente com o id do usuário logado e `distributor_id` com o distribuidor do vendedor. Quando o DISTRIBUTOR cadastra um cliente, pode definir qualquer vendedor ativo ou deixar `seller_id` `NULL`. O DISTRIBUTOR visualiza todos os clientes do seu escopo; o SELLER visualiza apenas os clientes onde `seller_id` corresponde ao seu `id`.
 
 ### 2.5. payment_methods
 
-| Column     | Type        | Constraints                  | Descrição                                                                 |
-| :--------- | :---------- | :--------------------------- | :------------------------------------------------------------------------ |
-| id         | INTEGER     | PK, Not Null, Auto-increment | Identificador único                                                       |
-| name       | VARCHAR(50) | Not Null                     | Nome do meio de pagamento (ex.: Dinheiro, PIX, Boleto, Cartão de Crédito) |
-| is_active  | BOOLEAN     | Not Null, Default TRUE       | Meios inativos não aparecem na seleção de novos pedidos                   |
-| created_at | TIMESTAMP   | Not Null, Default NOW()      | Data de criação                                                           |
-| updated_at | TIMESTAMP   | Not Null, Default NOW()      | Data da última atualização                                                |
+| Column     | Type          | Constraints                  | Descrição                                                                 |
+| :--------- | :------------ | :--------------------------- | :------------------------------------------------------------------------ |
+| id         | `INTEGER`     | PK, Not Null, Auto-increment | Identificador único                                                       |
+| name       | `VARCHAR(50)` | Not Null                     | Nome do meio de pagamento (ex.: Dinheiro, PIX, Boleto, Cartão de Crédito) |
+| created_at | `TIMESTAMP`   | Not Null, Default `NOW()`    | Data de criação                                                           |
+| updated_at | `TIMESTAMP`   | Not Null, Default `NOW()`    | Data da última atualização                                                |
 
 ### 2.6. orders
 
-| Column               | Type        | Constraints                      | Descrição                                                                         |
-| :------------------- | :---------- | :------------------------------- | :-------------------------------------------------------------------------------- |
-| id                   | INTEGER     | PK, Not Null, Auto-increment     | Identificador único                                                               |
-| customer_id          | INTEGER     | FK(customers.id), Not Null       | Cliente do pedido                                                                 |
-| distributor_id       | INTEGER     | FK(users.id), Not Null           | Distribuidor responsável pelo escopo do pedido                                    |
-| seller_id            | INTEGER     | FK(users.id), Nullable           | Vendedor que registrou o pedido; NULL quando criado diretamente pelo distribuidor |
-| payment_method_id    | INTEGER     | FK(payment_methods.id), Nullable | Meio de pagamento selecionado no momento da venda                                 |
-| discount_pct         | INTEGER     | Not Null, Default 0              | Percentual de desconto aplicado sobre `total_amount`; entre 0 e 100              |
-| payment_installments | INTEGER     | Not Null, Default 1              | Número de parcelas do pagamento; entre 1 e 10                                    |
-| payment_due_date     | DATE        | Not Null                         | Data de vencimento do pagamento                                                   |
-| notes                | TEXT        | Nullable                         | Observação livre sobre o pedido                                                   |
-| status               | VARCHAR(16) | Not Null, Default 'PENDING'      | Status atual do pedido                                                            |
-| is_active            | BOOLEAN     | Not Null, Default TRUE           | Pedidos inativados saem das listagens; o histórico é preservado                   |
-| created_at           | TIMESTAMP   | Not Null, Default NOW()          | Data de criação                                                                   |
-| updated_at           | TIMESTAMP   | Not Null, Default NOW()          | Data da última atualização                                                        |
+| Column               | Type          | Constraints                      | Descrição                                                                           |
+| :------------------- | :------------ | :------------------------------- | :---------------------------------------------------------------------------------- |
+| id                   | `INTEGER`     | PK, Not Null, Auto-increment     | Identificador único                                                                 |
+| customer_id          | `INTEGER`     | FK(customers.id), Not Null       | Cliente do pedido                                                                   |
+| distributor_id       | `INTEGER`     | FK(users.id), Not Null           | Distribuidor responsável pelo escopo do pedido                                      |
+| seller_id            | `INTEGER`     | FK(users.id), Nullable           | Vendedor que registrou o pedido; `NULL` quando criado diretamente pelo distribuidor |
+| payment_method_id    | `INTEGER`     | FK(payment_methods.id), Nullable | Meio de pagamento selecionado no momento da venda                                   |
+| discount_pct         | `INTEGER`     | Not Null, Default 0              | Percentual de desconto aplicado sobre `total_amount`; entre 0 e 100                 |
+| payment_installments | `INTEGER`     | Not Null, Default 1              | Número de parcelas do pagamento; entre 1 e 10                                       |
+| payment_due_date     | `DATE`        | Not Null                         | Data de vencimento do pagamento                                                     |
+| notes                | `TEXT`        | Nullable                         | Observação livre sobre o pedido                                                     |
+| status               | `VARCHAR(16)` | Not Null, Default 'PENDING'      | Status atual do pedido                                                              |
+| created_at           | `TIMESTAMP`   | Not Null, Default `NOW()`        | Data de criação                                                                     |
+| updated_at           | `TIMESTAMP`   | Not Null, Default `NOW()`        | Data da última atualização                                                          |
 
 > **FK:** `orders.customer_id` → `customers.id`  
 > **FK:** `orders.distributor_id` → `users.id`  
@@ -158,15 +154,15 @@
 
 ### 2.7. order_items
 
-| Column     | Type          | Constraints                  | Descrição                                                                                  |
-| :--------- | :------------ | :--------------------------- | :----------------------------------------------------------------------------------------- |
-| id         | INTEGER       | PK, Not Null, Auto-increment | Identificador único                                                                        |
-| order_id   | INTEGER       | FK(orders.id), Not Null      | Pedido ao qual o item pertence                                                             |
-| product_id | INTEGER       | FK(products.id), Not Null    | Produto vendido                                                                            |
-| quantity   | INTEGER       | Not Null                     | Quantidade vendida; deduzida de `distributor_stocks.current_quantity` na criação do pedido |
-| unit_price | DECIMAL(15,2) | Not Null                     | Preço unitário aplicado na venda; pode diferir do `suggested_price` do produto             |
-| created_at | TIMESTAMP     | Not Null, Default NOW()      | Data de criação                                                                            |
-| updated_at | TIMESTAMP     | Not Null, Default NOW()      | Data da última atualização                                                                 |
+| Column     | Type            | Constraints                  | Descrição                                                                                  |
+| :--------- | :-------------- | :--------------------------- | :----------------------------------------------------------------------------------------- |
+| id         | `INTEGER`       | PK, Not Null, Auto-increment | Identificador único                                                                        |
+| order_id   | `INTEGER`       | FK(orders.id), Not Null      | Pedido ao qual o item pertence                                                             |
+| product_id | `INTEGER`       | FK(products.id), Not Null    | Produto vendido                                                                            |
+| quantity   | `INTEGER`       | Not Null                     | Quantidade vendida; deduzida de `distributor_stocks.current_quantity` na criação do pedido |
+| unit_price | `DECIMAL(15,2)` | Not Null                     | Preço unitário aplicado na venda; pode diferir do `suggested_price` do produto             |
+| created_at | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data de criação                                                                            |
+| updated_at | `TIMESTAMP`     | Not Null, Default `NOW()`    | Data da última atualização                                                                 |
 
 > **FK:** `order_items.order_id` → `orders.id`  
 > **FK:** `order_items.product_id` → `products.id`  
