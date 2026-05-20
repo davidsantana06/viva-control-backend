@@ -62,9 +62,9 @@ class ProductResource(Resource):
         """Update a product by ID"""
         return ProductService.update(id, product_ns.payload)
 
-    # @delete_resource(product_ns, ProductNotFoundException)
-    # @auth_required(UserRole.ADMIN)
-    # def delete(self, id: int, **_):
-    #     """Delete a product by ID"""
-    #     ProductService.delete(id)
-    #     return "", HTTPStatus.NO_CONTENT
+    @delete_resource(product_ns, ProductNotFoundException)
+    @auth_required(UserRole.ADMIN)
+    def delete(self, id: int, **_):
+        """Delete a product by ID"""
+        ProductService.delete(id)
+        return "", HTTPStatus.NO_CONTENT
