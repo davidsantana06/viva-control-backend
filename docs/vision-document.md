@@ -141,9 +141,9 @@ A estrutura do MVP é composta por quatro camadas:
 ### 5.1 Autenticação
 
 - Login por e-mail e senha.
-- Senha armazenada com hash bcrypt (nunca em texto plano).
-- Sessão controlada via JWT, com validade configurável.
-- Logout manual com invalidação do token no lado do cliente.
+- Senha armazenada com hash scrypt (nunca em texto plano).
+- Autenticação via par de tokens JWT: `access_token` (validade padrão 15 minutos, configurável via `JWT_ACCESS_TOKEN_EXPIRATION_IN_MINUTES`) emitido junto com `refresh_token` (validade padrão 30 dias, configurável via `JWT_REFRESH_TOKEN_EXPIRATION_IN_DAYS`); o `access_token` expirado pode ser renovado via `POST /auth/refresh`, autenticado pelo `refresh_token`, sem necessidade de novo login.
+- Logout manual por descarte local dos tokens; sem endpoint de logout nem revogação server-side.
 - HTTPS obrigatório em todos os ambientes a partir do deploy em produção.
 
 ### 5.2 Controle de Acesso (RBAC)
@@ -232,12 +232,12 @@ Se qualquer uma dessas validações falhar, o pedido não é criado e o sistema 
 
 #### 5.6.4 Status
 
-| Status           | Transições permitidas                         | Descrição                                            |
-| ---------------- | --------------------------------------------- | ---------------------------------------------------- |
-| PENDING          | → CANCELLED, DELIVERED_UNPAID, DELIVERED_PAID | Pedido criado, aguardando entrega                    |
-| CANCELLED        | nenhuma (terminal)                            | Pedido cancelado antes da entrega                    |
-| DELIVERED_UNPAID | → DELIVERED_PAID                              | Pedido entregue ao cliente; pagamento ainda pendente |
-| DELIVERED_PAID   | nenhuma (terminal)                            | Pedido entregue e pagamento confirmado               |
+| Status             | Transições permitidas                               | Descrição                                            |
+| ------------------ | --------------------------------------------------- | ---------------------------------------------------- |
+| `PENDING`          | → `CANCELLED`, `DELIVERED_UNPAID`, `DELIVERED_PAID` | Pedido criado, aguardando entrega                    |
+| `CANCELLED`        | nenhuma (terminal)                                  | Pedido cancelado antes da entrega                    |
+| `DELIVERED_UNPAID` | → `DELIVERED_PAID`                                  | Pedido entregue ao cliente; pagamento ainda pendente |
+| `DELIVERED_PAID`   | nenhuma (terminal)                                  | Pedido entregue e pagamento confirmado               |
 
 O SELLER pode alterar o status dos próprios pedidos. O DISTRIBUTOR pode alterar o status de qualquer pedido do seu escopo.
 
@@ -246,7 +246,6 @@ O SELLER pode alterar o status dos próprios pedidos. O DISTRIBUTOR pode alterar
 - Tabela de meios de pagamento gerenciada pelo ADMIN.
 - DISTRIBUTOR e SELLER podem apenas consultar os meios de pagamento disponíveis.
 - Campo: nome (ex.: Dinheiro, PIX, Boleto, Cartão de Crédito).
-- Meios inativos não aparecem na seleção de novos pedidos.
 
 ### 5.8 Bloqueio por Inadimplência
 
@@ -263,7 +262,7 @@ O desbloqueio acontece automaticamente quando o DISTRIBUTOR marca o pedido em ab
 | #    | Funcionalidade                                                                                                                                                       | Prioridade |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | RF01 | Autenticação por e-mail e senha com geração de token JWT                                                                                                             | Alta       |
-| RF02 | Logout com invalidação do token                                                                                                                                      | Alta       |
+| RF02 | Logout client-side: descarte local dos tokens sem endpoint de logout nem revogação server-side                                                                       | Alta       |
 | RF03 | Controle de acesso por perfil em todas as rotas e ações                                                                                                              | Alta       |
 | RF04 | CRUD de usuários (DISTRIBUTOR e SELLER) restrito ao ADMIN; DISTRIBUTOR pode R usuários do seu escopo; SELLER sempre vinculado a um distribuidor via `distributor_id` | Alta       |
 | RF05 | CRUD de produtos (global) restrito ao ADMIN; consulta aberta a DISTRIBUTOR e SELLER                                                                                  | Alta       |
@@ -318,8 +317,8 @@ O desbloqueio acontece automaticamente quando o DISTRIBUTOR marca o pedido em ab
 ### 8.3 Segurança
 
 - HTTPS obrigatório em produção.
-- Senhas com hash bcrypt, custo mínimo 10.
-- Token JWT com expiração definida; não deve ser armazenado em `localStorage` no frontend.
+- Senhas com hash scrypt.
+- `access_token` com expiração de curta duração; não deve ser armazenado em `localStorage` no frontend. `refresh_token`, de validade estendida, deve ser armazenado em `httpOnly cookie` em aplicações web ou em keychain/keystore em clientes nativos.
 - O SELLER não deve conseguir acessar dados de outro vendedor via manipulação de parâmetros na URL ou no corpo da requisição.
 
 ### 8.4 Usabilidade
@@ -341,6 +340,6 @@ O desbloqueio acontece automaticamente quando o DISTRIBUTOR marca o pedido em ab
 ### 9.1 Comunicação entre Camadas
 
 - Frontend consome a API REST exposta pelo backend via HTTPS.
-- Autenticação via JWT: o token é emitido no login e enviado no header `Authorization: Bearer` em todas as requisições subsequentes.
+- Autenticação via par de tokens JWT: o `access_token` é emitido no login junto com o `refresh_token` e enviado no header `Authorization: Bearer` em todas as requisições subsequentes; quando expirado, pode ser renovado via `POST /auth/refresh`, autenticado pelo `refresh_token`, sem novo login.
 - O backend valida o token e o perfil do usuário antes de processar qualquer operação — as regras de RBAC residem integralmente no backend, nunca apenas no frontend.
-- A documentação da API é gerada automaticamente pelo Flask-RESTX e fica disponível via Swagger UI no endpoint `/api/docs`.
+- A documentação da API é gerada automaticamente pelo Flask-RESTX e fica disponível via Swagger UI no endpoint `/`.
