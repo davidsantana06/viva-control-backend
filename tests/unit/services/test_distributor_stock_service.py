@@ -9,17 +9,17 @@ from app.exceptions import (
 
 
 def test_create__returns_created_stock(mock_stock: MagicMock):
-    # A
+    # Arrange
     p_stock_cls = patch("app.services.distributor_stock_service.DistributorStock")
 
     with p_stock_cls as MockStock:
         MockStock.find_first_by_product_and_distributor_ids.return_value = None
         MockStock.return_value = mock_stock
 
-        # A
+        # Act
         result = DistributorStockService.create({"product_id": 1, "distributor_id": 1})
 
-        # A
+        # Assert
         assert result == mock_stock
 
 

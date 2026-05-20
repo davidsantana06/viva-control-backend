@@ -7,17 +7,17 @@ from app.types import UserRole
 
 
 def test_find_first__returns_seller(mock_user: MagicMock):
-    # A
+    # Arrange
     p_find = patch(
         "app.services.seller_service.User.find_first_by_id_and_role",
         return_value=mock_user,
     )
 
     with p_find:
-        # A
+        # Act
         result = SellerService.find_first(mock_user.id)
 
-        # A
+        # Assert
         assert result == mock_user
 
 

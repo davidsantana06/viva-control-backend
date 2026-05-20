@@ -16,7 +16,7 @@ def test_create__returns_created_order(
     mock_customer: MagicMock,
     mock_order: MagicMock,
 ):
-    # A
+    # Arrange
     mock_items = [MagicMock()]
     dto = {"customer_id": 1, "distributor_id": 1, "items": mock_items}
 
@@ -29,19 +29,17 @@ def test_create__returns_created_order(
         "app.services.order_service.OrderItemService.create_all_staged",
         return_value=mock_items,
     )
-    p_deduct = patch(
-        "app.services.order_service.DistributorStockService.deduct_all_staged"
-    )
+    p_deduct = patch("app.services.order_service.DistributorStockService.deduct_all_staged")
     p_db = patch("app.services.order_service.db")
 
     with p_customer, p_order_cls as MockOrder, p_items, p_deduct, p_db:
         MockOrder.find_first_delivered_unpaid_by_customer_id.return_value = None
         MockOrder.return_value = mock_order
 
-        # A
+        # Act
         result = OrderService.create(dto, {})
 
-        # A
+        # Assert
         assert result == mock_order
 
 
@@ -99,9 +97,7 @@ def test_create__deducts_stock_for_each_item(
         "app.services.order_service.OrderItemService.create_all_staged",
         return_value=mock_items,
     )
-    p_deduct = patch(
-        "app.services.order_service.DistributorStockService.deduct_all_staged"
-    )
+    p_deduct = patch("app.services.order_service.DistributorStockService.deduct_all_staged")
     p_db = patch("app.services.order_service.db")
 
     with p_customer, p_order_cls as MockOrder, p_items, p_deduct as mock_deduct, p_db:
@@ -237,7 +233,9 @@ def test_update_status__raises_if_transition_invalid(mock_order: MagicMock):
         # A / A
         with pytest.raises(InvalidOrderStatusTransitionException):
             OrderService.update_status(
-                mock_order.id, {"status": OrderStatus.CANCELLED}, {}
+                mock_order.id,
+                {"status": OrderStatus.CANCELLED},
+                {},
             )
 
 
@@ -251,9 +249,7 @@ def test_update_status__restores_stock_if_cancelled(mock_order: MagicMock):
         "app.services.order_service.OrderService.find_first_or_raise",
         return_value=mock_order,
     )
-    p_restore = patch(
-        "app.services.order_service.DistributorStockService.restore_all_staged"
-    )
+    p_restore = patch("app.services.order_service.DistributorStockService.restore_all_staged")
     p_db = patch("app.services.order_service.db")
 
     with p_find, p_restore as mock_restore, p_db:

@@ -6,7 +6,7 @@ from app.exceptions import ProductNotFoundException
 
 
 def test_create_all_staged__returns_order_items(mock_product: MagicMock):
-    # A
+    # Arrange
     item1, item2 = MagicMock(), MagicMock()
     dtos = [
         {"product_id": 1, "quantity": 2, "unit_price": 10.0},
@@ -23,10 +23,10 @@ def test_create_all_staged__returns_order_items(mock_product: MagicMock):
     )
 
     with p_product, p_order_item:
-        # A
+        # Act
         result = OrderItemService.create_all_staged(dtos)
 
-        # A
+        # Assert
         assert result == [item1, item2]
 
 

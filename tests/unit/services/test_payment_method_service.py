@@ -6,16 +6,16 @@ from app.exceptions import PaymentMethodNotFoundException
 
 
 def test_create__returns_created_payment_method(mock_payment_method: MagicMock):
-    # A
+    # Arrange
     p_pm_cls = patch("app.services.payment_method_service.PaymentMethod")
 
     with p_pm_cls as MockPaymentMethod:
         MockPaymentMethod.return_value = mock_payment_method
 
-        # A
+        # Act
         result = PaymentMethodService.create({"name": "Dinheiro"})
 
-        # A
+        # Assert
         assert result == mock_payment_method
 
 

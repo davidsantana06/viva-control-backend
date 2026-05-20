@@ -6,16 +6,16 @@ from app.exceptions import CustomerNotFoundException
 
 
 def test_create__returns_created_customer(mock_customer: MagicMock):
-    # A
+    # Arrange
     p_customer_cls = patch("app.services.customer_service.Customer")
 
     with p_customer_cls as MockCustomer:
         MockCustomer.return_value = mock_customer
 
-        # A
+        # Act
         result = CustomerService.create({"name": "Test", "distributor_id": 1})
 
-        # A
+        # Assert
         assert result == mock_customer
 
 

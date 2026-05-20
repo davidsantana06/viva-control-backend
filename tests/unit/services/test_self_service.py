@@ -6,17 +6,17 @@ from app.exceptions import UserNotFoundException
 
 
 def test_find_first_or_raise__returns_user(mock_user: MagicMock):
-    # A
+    # Arrange
     p_find = patch(
         "app.services.self_service.User.find_first_by_id",
         return_value=mock_user,
     )
 
     with p_find:
-        # A
+        # Act
         result = SelfService.find_first_or_raise(mock_user.id)
 
-        # A
+        # Assert
         assert result == mock_user
 
 
