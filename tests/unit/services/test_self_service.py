@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
 import pytest
+
 from app.services import SelfService
 from app.exceptions import UserNotFoundException
 

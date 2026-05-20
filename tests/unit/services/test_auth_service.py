@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
 import pytest
+
 from app.services import AuthService
 from app.exceptions import InvalidCredentialsException, UserNotFoundException
 

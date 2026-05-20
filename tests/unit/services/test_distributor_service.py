@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
 import pytest
+
 from app.services import DistributorService
 from app.exceptions import UserNotFoundException
 from app.types import UserRole
